@@ -1,0 +1,12 @@
+machine:
+  java:
+    version: oraclejdk8
+general:
+  artifacts:
+    - "target/library-app.ear"
+test:
+  post:
+    - mvn clean install
+deployment:
+  master:
+    branch: master
