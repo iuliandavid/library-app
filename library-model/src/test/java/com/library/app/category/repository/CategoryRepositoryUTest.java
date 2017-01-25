@@ -81,4 +81,21 @@ public class CategoryRepositoryUTest {
 		final Category category = categoryRepository.findById(null);
 		assertThat(category, is(nullValue()));
 	}
+
+	@Test
+	public void updateCategory() {
+
+		final Long categoryAddedId = dbCommandTransactionalExector
+				.executeCommand(() -> categoryRepository.add(java()).getId());
+
+		final Category categoryAfterAdd = categoryRepository.findById(categoryAddedId);
+		assertThat(categoryAfterAdd.getName(), is(equalTo(java().getName())));
+
+		categoryAfterAdd.setName(cleanCode().getName());
+		final Category categoryAfterUpdate = dbCommandTransactionalExector
+				.executeCommand(() -> categoryRepository.update(categoryAfterAdd));
+
+		assertThat(categoryAfterUpdate.getName(), is(equalTo(cleanCode().getName())));
+
+	}
 }
