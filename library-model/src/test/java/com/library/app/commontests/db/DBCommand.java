@@ -1,7 +1,7 @@
 /**
  * 
  */
-package com.library.app.category.commontests.db;
+package com.library.app.commontests.db;
 
 /**
  * An interface for providing the commands executed within a transaction
