@@ -10,6 +10,7 @@ package com.library.app.category.commontests.db;
  * @author iulian
  *
  */
+@FunctionalInterface
 public interface DBCommand<T> {
 
 	T execute();

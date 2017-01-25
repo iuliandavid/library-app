@@ -28,7 +28,10 @@ public class CategoryRepository {
 		return category;
 	}
 
-	public Category findById(final Long categoryAddedId) {
-		return em.find(Category.class, categoryAddedId);
+	public Category findById(final Long id) {
+		if (id == null) {
+			return null;
+		}
+		return em.find(Category.class, id);
 	}
 }

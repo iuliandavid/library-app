@@ -15,7 +15,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.library.app.category.commontests.db.DBCommand;
 import com.library.app.category.commontests.db.DbCommandTransactionalExector;
 import com.library.app.category.model.Category;
 
@@ -54,25 +53,32 @@ public class CategoryRepositoryUTest {
 	@Test
 	public void addCategory() {
 
-		final Long categoryAddedId = dbCommandTransactionalExector.executeCommand(new DBCommand<Long>() {
-			@Override
-			public Long execute() {
-				return categoryRepository.add(java()).getId();
-			}
-		});
+		final Long categoryAddedId = dbCommandTransactionalExector
+				.executeCommand(() -> categoryRepository.add(java()).getId());
 		assertThat(categoryAddedId, is(notNullValue()));
 	}
 
 	@Test
 	public void findAddedCategory() {
-		final Long categoryAddedId = dbCommandTransactionalExector.executeCommand(new DBCommand<Long>() {
-			@Override
-			public Long execute() {
-				return categoryRepository.add(java()).getId();
-			}
-		});
+
+		final Long categoryAddedId = dbCommandTransactionalExector
+				.executeCommand(() -> categoryRepository.add(java()).getId());
+
 		final Category category = categoryRepository.findById(categoryAddedId);
 		assertThat(category.getName(), is(equalTo(java().getName())));
 	}
 
+	@Test
+	public void findCategoryByIdNotFound() {
+
+		final Category category = categoryRepository.findById(999L);
+		assertThat(category, is(nullValue()));
+	}
+
+	@Test
+	public void findCategoryByIdWithNullId() {
+
+		final Category category = categoryRepository.findById(null);
+		assertThat(category, is(nullValue()));
+	}
 }
