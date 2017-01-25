@@ -122,11 +122,42 @@ public class CategoryRepositoryUTest {
 
 	}
 
+	@Test(expected = NullPointerException.class)
+	public void findAllCategoriesNullOrderFieldThrowsError() {
+		categoryRepository.findAll(null);
+
+	}
+
 	@Test
 	public void alreadyExistsForAdd() {
 		dbCommandTransactionalExector
 				.executeCommand(() -> categoryRepository.add(java()).getId());
 		assertThat(categoryRepository.alreadyExists(java()), is(equalTo(true)));
 		assertThat(categoryRepository.alreadyExists(cleanCode()), is(equalTo(false)));
+	}
+
+	@Test
+	public void alreadyExistsCategoryWithId() {
+		final Category java = dbCommandTransactionalExector
+				.executeCommand(() -> {
+					categoryRepository.add(cleanCode());
+					return categoryRepository.add(java());
+				});
+
+		assertThat(categoryRepository.alreadyExists(java), is(equalTo(false)));
+
+		java.setName(cleanCode().getName());
+		assertThat(categoryRepository.alreadyExists(java), is(equalTo(true)));
+
+		java.setName(networks().getName());
+		assertThat(categoryRepository.alreadyExists(java), is(equalTo(false)));
+	}
+
+	@Test
+	public void existsById() {
+		final Long categoryAddedId = dbCommandTransactionalExector
+				.executeCommand(() -> categoryRepository.add(java()).getId());
+		assertThat(categoryRepository.existsById(categoryAddedId), is(equalTo(true)));
+		assertThat(categoryRepository.existsById(999L), is(equalTo(false)));
 	}
 }
