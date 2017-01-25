@@ -17,8 +17,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.library.app.category.commontests.db.DbCommandTransactionalExector;
 import com.library.app.category.model.Category;
+import com.library.app.commontests.db.DbCommandTransactionalExecutor;
 
 /**
  * Unit testing for CategoryRepository
@@ -33,7 +33,7 @@ public class CategoryRepositoryUTest {
 	private EntityManager em;
 	private CategoryRepository categoryRepository;
 
-	private DbCommandTransactionalExector dbCommandTransactionalExector;
+	private DbCommandTransactionalExecutor dbCommandTransactionalExecutor;
 
 	@Before
 	public void initTestCase() {
@@ -42,7 +42,7 @@ public class CategoryRepositoryUTest {
 		categoryRepository = new CategoryRepository();
 		categoryRepository.em = em;
 
-		dbCommandTransactionalExector = new DbCommandTransactionalExector(em);
+		dbCommandTransactionalExecutor = new DbCommandTransactionalExecutor(em);
 
 	}
 
@@ -55,7 +55,7 @@ public class CategoryRepositoryUTest {
 	@Test
 	public void addCategory() {
 
-		final Long categoryAddedId = dbCommandTransactionalExector
+		final Long categoryAddedId = dbCommandTransactionalExecutor
 				.executeCommand(() -> categoryRepository.add(java()).getId());
 		assertThat(categoryAddedId, is(notNullValue()));
 	}
@@ -63,7 +63,7 @@ public class CategoryRepositoryUTest {
 	@Test
 	public void findAddedCategory() {
 
-		final Long categoryAddedId = dbCommandTransactionalExector
+		final Long categoryAddedId = dbCommandTransactionalExecutor
 				.executeCommand(() -> categoryRepository.add(java()).getId());
 
 		final Category category = categoryRepository.findById(categoryAddedId);
@@ -87,14 +87,14 @@ public class CategoryRepositoryUTest {
 	@Test
 	public void updateCategory() {
 
-		final Long categoryAddedId = dbCommandTransactionalExector
+		final Long categoryAddedId = dbCommandTransactionalExecutor
 				.executeCommand(() -> categoryRepository.add(java()).getId());
 
 		final Category categoryAfterAdd = categoryRepository.findById(categoryAddedId);
 		assertThat(categoryAfterAdd.getName(), is(equalTo(java().getName())));
 
 		categoryAfterAdd.setName(cleanCode().getName());
-		final Category categoryAfterUpdate = dbCommandTransactionalExector
+		final Category categoryAfterUpdate = dbCommandTransactionalExecutor
 				.executeCommand(() -> categoryRepository.update(categoryAfterAdd));
 
 		assertThat(categoryAfterUpdate.getName(), is(equalTo(cleanCode().getName())));
@@ -105,7 +105,7 @@ public class CategoryRepositoryUTest {
 	public void findAllCategories() {
 		// Given
 		// all categories inserted
-		dbCommandTransactionalExector.executeCommand(() -> {
+		dbCommandTransactionalExecutor.executeCommand(() -> {
 			allCategories().forEach(categoryRepository::add);
 			return null;
 		});
@@ -130,7 +130,7 @@ public class CategoryRepositoryUTest {
 
 	@Test
 	public void alreadyExistsForAdd() {
-		dbCommandTransactionalExector
+		dbCommandTransactionalExecutor
 				.executeCommand(() -> categoryRepository.add(java()).getId());
 		assertThat(categoryRepository.alreadyExists(java()), is(equalTo(true)));
 		assertThat(categoryRepository.alreadyExists(cleanCode()), is(equalTo(false)));
@@ -138,7 +138,7 @@ public class CategoryRepositoryUTest {
 
 	@Test
 	public void alreadyExistsCategoryWithId() {
-		final Category java = dbCommandTransactionalExector
+		final Category java = dbCommandTransactionalExecutor
 				.executeCommand(() -> {
 					categoryRepository.add(cleanCode());
 					return categoryRepository.add(java());
@@ -155,7 +155,7 @@ public class CategoryRepositoryUTest {
 
 	@Test
 	public void existsById() {
-		final Long categoryAddedId = dbCommandTransactionalExector
+		final Long categoryAddedId = dbCommandTransactionalExecutor
 				.executeCommand(() -> categoryRepository.add(java()).getId());
 		assertThat(categoryRepository.existsById(categoryAddedId), is(equalTo(true)));
 		assertThat(categoryRepository.existsById(999L), is(equalTo(false)));
