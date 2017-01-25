@@ -7,6 +7,8 @@ import static com.library.app.commontests.category.CategoryForTestsRepository.*;
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 
+import java.util.List;
+
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
@@ -97,5 +99,34 @@ public class CategoryRepositoryUTest {
 
 		assertThat(categoryAfterUpdate.getName(), is(equalTo(cleanCode().getName())));
 
+	}
+
+	@Test
+	public void findAllCategories() {
+		// Given
+		// all categories inserted
+		dbCommandTransactionalExector.executeCommand(() -> {
+			allCategories().forEach(categoryRepository::add);
+			return null;
+		});
+		// when
+		final List<Category> categories = categoryRepository.findAll("name");
+		// then
+		assertThat(categories, is(notNullValue()));
+		assertThat(categories.size(), is(equalTo(4)));
+		// Testing the ordering based on the parameter
+		assertThat(categories.get(0).getName(), is(equalTo(architecture().getName())));
+		assertThat(categories.get(1).getName(), is(equalTo(cleanCode().getName())));
+		assertThat(categories.get(2).getName(), is(equalTo(java().getName())));
+		assertThat(categories.get(3).getName(), is(equalTo(networks().getName())));
+
+	}
+
+	@Test
+	public void alreadyExistsForAdd() {
+		dbCommandTransactionalExector
+				.executeCommand(() -> categoryRepository.add(java()).getId());
+		assertThat(categoryRepository.alreadyExists(java()), is(equalTo(true)));
+		assertThat(categoryRepository.alreadyExists(cleanCode()), is(equalTo(false)));
 	}
 }
