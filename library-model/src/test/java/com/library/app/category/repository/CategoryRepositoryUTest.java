@@ -15,6 +15,10 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.library.app.category.commontests.db.DBCommand;
+import com.library.app.category.commontests.db.DbCommandTransactionalExector;
+import com.library.app.category.model.Category;
+
 /**
  * Unit testing for CategoryRepository
  * 
@@ -28,12 +32,17 @@ public class CategoryRepositoryUTest {
 	private EntityManager em;
 	private CategoryRepository categoryRepository;
 
+	private DbCommandTransactionalExector dbCommandTransactionalExector;
+
 	@Before
 	public void initTestCase() {
 		emf = Persistence.createEntityManagerFactory("libraryPU");
 		em = emf.createEntityManager();
 		categoryRepository = new CategoryRepository();
 		categoryRepository.em = em;
+
+		dbCommandTransactionalExector = new DbCommandTransactionalExector(em);
+
 	}
 
 	@After
@@ -43,17 +52,27 @@ public class CategoryRepositoryUTest {
 	}
 
 	@Test
-	public void addCategoryAndFindIt() {
-		try {
-			em.getTransaction().begin();
-			final Long categoryAddedId = categoryRepository.add(java()).getId();
-			assertThat(categoryAddedId, is(notNullValue()));
-			em.getTransaction().commit();
-			em.clear();
-		} catch (final Exception e) {
-			e.printStackTrace();
-			em.getTransaction().rollback();
-		}
+	public void addCategory() {
+
+		final Long categoryAddedId = dbCommandTransactionalExector.executeCommand(new DBCommand<Long>() {
+			@Override
+			public Long execute() {
+				return categoryRepository.add(java()).getId();
+			}
+		});
+		assertThat(categoryAddedId, is(notNullValue()));
+	}
+
+	@Test
+	public void findAddedCategory() {
+		final Long categoryAddedId = dbCommandTransactionalExector.executeCommand(new DBCommand<Long>() {
+			@Override
+			public Long execute() {
+				return categoryRepository.add(java()).getId();
+			}
+		});
+		final Category category = categoryRepository.findById(categoryAddedId);
+		assertThat(category.getName(), is(equalTo(java().getName())));
 	}
 
 }

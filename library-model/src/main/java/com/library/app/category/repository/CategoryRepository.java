@@ -27,4 +27,8 @@ public class CategoryRepository {
 		em.persist(category);
 		return category;
 	}
+
+	public Category findById(final Long categoryAddedId) {
+		return em.find(Category.class, categoryAddedId);
+	}
 }
