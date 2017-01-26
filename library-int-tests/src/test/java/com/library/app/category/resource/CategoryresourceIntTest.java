@@ -56,7 +56,7 @@ public class CategoryresourceIntTest {
 	public static WebArchive createDeployment() {
 		return ShrinkWrap
 				.create(WebArchive.class)
-				.addPackages(true, "comm.library.app")
+				.addPackages(true, "com.library.app")
 				.addAsResource("persistence-integration.xml", "META-INF/persistence.xml")
 				.addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml")
 				.setWebXML(new File("src/test/resources/web.xml"))
@@ -74,7 +74,7 @@ public class CategoryresourceIntTest {
 	@RunAsClient
 	public void addValidCategoryAndFindIt() {
 		final Response response = resourceClient.resourcePath(PATH_RESOURCE)
-				.postWithContent(getPathFileRequest(PATH_RESOURCE, "category.json"));
+				.postWithFile(getPathFileRequest(PATH_RESOURCE, "category.json"));
 		assertThat(response.getStatus(), is(equalTo(HttpCode.CREATED.getCode())));
 
 		// since the response will be a String we will read the Body (response.readEntity) as String
