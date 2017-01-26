@@ -35,6 +35,7 @@ public class CategoryServicesUTest {
 
 	private CategoryServices categoryServices;
 
+	/** Using a default validator **/
 	private Validator validator;
 
 	/** The mockable concrete class **/
