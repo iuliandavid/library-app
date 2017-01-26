@@ -1,7 +1,7 @@
 /**
  * 
  */
-package com.library.app.category.commontests.db;
+package com.library.app.commontests.db;
 
 import javax.persistence.EntityManager;
 
@@ -14,14 +14,14 @@ import org.junit.Ignore;
  *
  */
 @Ignore
-public class DbCommandTransactionalExector {
+public class DbCommandTransactionalExecutor {
 
 	/**
 	 * The entity manager in which transaction will be performed
 	 */
 	private EntityManager em;
 
-	public DbCommandTransactionalExector(final EntityManager em) {
+	public DbCommandTransactionalExecutor(final EntityManager em) {
 		this.em = em;
 	}
 

@@ -38,4 +38,12 @@ public class CategoryForTestsRepository {
 	public static List<Category> allCategories() {
 		return Arrays.asList(java(), cleanCode(), architecture(), networks());
 	}
+
+	/**
+	 * @return
+	 */
+	public static Category categoryWithID(final Category category, final Long id) {
+		category.setId(id);
+		return category;
+	}
 }
