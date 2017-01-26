@@ -10,6 +10,9 @@ import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+
 import javax.ws.rs.core.Response;
 
 import org.junit.Before;
@@ -18,7 +21,10 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import com.library.app.category.CategoryExistentException;
+import com.library.app.category.CategoryNotFoundException;
+import com.library.app.category.model.Category;
 import com.library.app.category.services.CategoryServices;
+import com.library.app.common.exception.FieldNotValidException;
 import com.library.app.common.model.HttpCode;
 
 /**
@@ -43,6 +49,7 @@ public class CategoryResourceUTest {
 		categoryResource.categoryJsonConverter = new CategoryJsonConverter();
 	}
 
+	// Adds
 	@Test
 	public void addValidCategory() {
 		when(categoryServices.add(java())).thenReturn(categoryWithID(java(), 1L));
@@ -61,6 +68,97 @@ public class CategoryResourceUTest {
 				"newCategory.json")));
 		assertThat(response.getStatus(), is(equalTo(HttpCode.VALIDATION_ERROR.getCode())));
 		assertJsonResponseWithFile(response, "categoryAlreadyExists.json");
+	}
+
+	@Test
+	public void addCategoryWithNullName() {
+		when(categoryServices.add(new Category()))
+				.thenThrow(new FieldNotValidException("name", "Category Name cannot be null"));
+
+		final Response response = categoryResource.add(readJsonFile(getPathFileRequest(PATH_RESOURCE,
+				"categoryWithNullName.json")));
+		assertThat(response.getStatus(), is(equalTo(HttpCode.VALIDATION_ERROR.getCode())));
+		assertJsonResponseWithFile(response, "categoryErrorNullName.json");
+	}
+
+	// Updates
+	@Test
+	public void updateValidCategory() {
+		when(categoryServices.add(java())).thenReturn(categoryWithID(java(), 1L));
+
+		final Response response = categoryResource.update(1l, readJsonFile(getPathFileRequest(PATH_RESOURCE,
+				"category.json")));
+		assertThat(response.getStatus(), is(equalTo(HttpCode.OK.getCode())));
+		assertThat(response.getEntity().toString(), is(equalTo("")));
+		verify(categoryServices).update(categoryWithID(java(), 1l));
+	}
+
+	@Test
+	public void updteCategoryWithNameBelongingToTotherCategory() {
+		doThrow(new CategoryExistentException()).when(categoryServices).update(categoryWithID(java(), 1L));
+
+		final Response response = categoryResource.update(1l, readJsonFile(getPathFileRequest(PATH_RESOURCE,
+				"category.json")));
+		assertThat(response.getStatus(), is(equalTo(HttpCode.VALIDATION_ERROR.getCode())));
+		assertJsonResponseWithFile(response, "categoryAlreadyExists.json");
+	}
+
+	@Test
+	public void updateCategoryWithNullName() {
+		doThrow(new FieldNotValidException("name", "Category Name cannot be null")).when(categoryServices)
+				.update(categoryWithID(new Category(), 1L));
+
+		final Response response = categoryResource.update(1l, readJsonFile(getPathFileRequest(PATH_RESOURCE,
+				"categoryWithNullName.json")));
+		assertThat(response.getStatus(), is(equalTo(HttpCode.VALIDATION_ERROR.getCode())));
+		assertJsonResponseWithFile(response, "categoryErrorNullName.json");
+	}
+
+	@Test
+	public void updateCategoryNotFound() {
+		doThrow(new CategoryNotFoundException()).when(categoryServices)
+				.update(categoryWithID(java(), 1L));
+
+		final Response response = categoryResource.update(1l, readJsonFile(getPathFileRequest(PATH_RESOURCE,
+				"category.json")));
+		assertThat(response.getStatus(), is(equalTo(HttpCode.NOT_FOUND.getCode())));
+		assertJsonResponseWithFile(response, "categoryNotFound.json");
+	}
+
+	// Test findByID
+	@Test
+	public void findCategory() {
+		when(categoryServices.findById(1l)).thenReturn(categoryWithID(java(), 1L));
+		final Response response = categoryResource.findById(1L);
+		assertThat(response.getStatus(), is(equalTo(HttpCode.OK.getCode())));
+		assertJsonResponseWithFile(response, "categoryFound.json");
+	}
+
+	@Test
+	public void findCategoryNotFound() {
+		doThrow(new CategoryNotFoundException()).when(categoryServices)
+				.update(categoryServices.findById(1l));
+
+		final Response response = categoryResource.findById(1l);
+		assertThat(response.getStatus(), is(equalTo(HttpCode.NOT_FOUND.getCode())));
+	}
+
+	// Test findAll
+	@Test
+	public void findAllNoCategory() {
+		when(categoryServices.findAll()).thenReturn(new ArrayList<>());
+		final Response response = categoryResource.findAll();
+		assertThat(response.getStatus(), is(equalTo(HttpCode.OK.getCode())));
+		assertJsonResponseWithFile(response, "emptyListOfCategories.json");
+	}
+
+	@Test
+	public void findAllTwoCategories() {
+		when(categoryServices.findAll())
+				.thenReturn(Arrays.asList(categoryWithID(java(), 1L), categoryWithID(networks(), 2L)));
+		final Response response = categoryResource.findAll();
+		assertThat(response.getStatus(), is(equalTo(HttpCode.OK.getCode())));
+		assertJsonResponseWithFile(response, "twoCategories.json");
 	}
 
 	private void assertJsonResponseWithFile(final Response response, final String fileName) {

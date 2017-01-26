@@ -43,7 +43,7 @@ public class CategoryForTestsRepository {
 	 * @return
 	 */
 	public static Category categoryWithID(final Category category, final Long id) {
-		category.setId(1l);
+		category.setId(id);
 		return category;
 	}
 }

@@ -1,4 +1,4 @@
 {
     "errorIdentification": "category.invalidField.name",
-    "errorDescription": "may not be null"
+    "errorDescription": "Category Name cannot be null"
 }
