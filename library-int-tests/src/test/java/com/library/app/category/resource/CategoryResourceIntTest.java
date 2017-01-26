@@ -39,7 +39,7 @@ import com.library.app.commontests.utils.ResourceDefinitions;
  *
  */
 @RunWith(Arquillian.class)
-public class CategoryresourceIntTest {
+public class CategoryResourceIntTest {
 
 	/**
 	 * We don't know the url resource that why we let Arquillian decide
