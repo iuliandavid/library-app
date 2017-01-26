@@ -8,8 +8,8 @@
   <artifactId>library-int-tests</artifactId>
   
   <properties>
-		<version.arquillian_core>1.1.12.Final</version.arquillian_core>
-		<version.arquillian.wildfly>10.1.0.Final</version.arquillian.wildfly>
+		<version.arquillian_core>1.1.5.Final</version.arquillian_core>
+		<version.arquillian.wildfly>8.1.0.Final</version.arquillian.wildfly>
 	</properties>
 
 	<dependencies>
@@ -52,6 +52,7 @@
 		</dependency>
 	</dependencies>
 
+<!-- In Eclipse to get all the library the  "integrationTests-wildfly" should be set-->
 	<profiles>
 		<profile>
 			<id>skip-int-tests</id>
@@ -85,7 +86,7 @@
 		<profile>
 			<id>integrationTests-wildfly</id>
 			<properties>
-				<jboss.home>target/wildfly-10.1.0.Final</jboss.home>
+				<jboss.home>target/wildfly-8.1.0.Final</jboss.home>
 			</properties>
 			<build>
 				<testResources>

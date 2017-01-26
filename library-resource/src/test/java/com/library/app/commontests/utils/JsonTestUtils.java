@@ -10,6 +10,9 @@ import org.json.JSONException;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 
+import com.google.gson.JsonObject;
+import com.library.app.common.json.JsonReader;
+
 /**
  * Helper class for comparing JSONS
  * 
@@ -37,5 +40,10 @@ public class JsonTestUtils {
 		} catch (final JSONException e) {
 			throw new IllegalArgumentException(e);
 		}
+	}
+
+	public static Long getIdFromJson(final String json) {
+		final JsonObject jsonObject = JsonReader.readAsJsonObject(json);
+		return JsonReader.getLongOrNull(jsonObject, "id");
 	}
 }
