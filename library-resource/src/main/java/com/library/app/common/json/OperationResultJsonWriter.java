@@ -3,7 +3,7 @@
  */
 package com.library.app.common.json;
 
-import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import com.library.app.common.model.OperationResult;
 
 /**
@@ -18,10 +18,25 @@ public class OperationResultJsonWriter {
 	}
 
 	public static String toJson(final OperationResult operationResult) {
-		if (operationResult == null) {
-			return "";
+		return JsonWriter.writeToString(getJsonObject(operationResult));
+	}
+
+	private static Object getJsonObject(final OperationResult operationResult) {
+		if (operationResult.isSuccess()) {
+			return getJsonSucces(operationResult);
+		} else {
+			return getJsonError(operationResult);
 		}
-		final Gson gson = new Gson();
-		return gson.toJson(operationResult.getEntity());
+	}
+
+	private static Object getJsonSucces(final OperationResult operationResult) {
+		return operationResult.getEntity();
+	}
+
+	private static Object getJsonError(final OperationResult operationResult) {
+		final JsonObject jsonObject = new JsonObject();
+		jsonObject.addProperty("errorIdentification", operationResult.getErrorIdentification());
+		jsonObject.addProperty("errorDescription", operationResult.getErrorDescription());
+		return jsonObject;
 	}
 }

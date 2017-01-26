@@ -3,9 +3,8 @@
  */
 package com.library.app.common.json;
 
-import org.json.JSONArray;
-
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
@@ -22,8 +21,8 @@ public class JsonReader {
 		return readJsonAs(json, JsonObject.class);
 	}
 
-	public static JSONArray readAsJsonArray(final String json) throws InvalidJsonException {
-		return readJsonAs(json, JSONArray.class);
+	public static JsonArray readAsJsonArray(final String json) throws InvalidJsonException {
+		return readJsonAs(json, JsonArray.class);
 	}
 
 	public static <T> T readJsonAs(final String json, final Class<T> jsonClass) throws InvalidJsonException {

@@ -38,7 +38,7 @@ public class OperationResult {
 	 *            - response body
 	 */
 	private OperationResult(final Object entity) {
-		this.success = false;
+		this.success = true;
 		this.entity = entity;
 	}
 

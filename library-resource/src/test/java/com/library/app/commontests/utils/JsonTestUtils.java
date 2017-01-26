@@ -18,13 +18,17 @@ import org.skyscreamer.jsonassert.JSONCompareMode;
  */
 public class JsonTestUtils {
 
-	public static final String BASE_JOSN_PATH = "json/";
+	public static final String BASE_JSON_PATH = "json/";
 
 	public static String readJsonFile(final String relativePath) {
-		final InputStream is = JsonTestUtils.class.getClassLoader().getResourceAsStream(BASE_JOSN_PATH + relativePath);
+		final InputStream is = JsonTestUtils.class.getClassLoader().getResourceAsStream(BASE_JSON_PATH + relativePath);
 		try (Scanner s = new Scanner(is)) {
 			return s.useDelimiter("\\A").hasNext() ? s.next() : "";
 		}
+	}
+
+	public static void assertJsonMatchesFileContent(final String actualJson, final String fileNameWithExpectedJson) {
+		assertJsonMatchesFileContent(actualJson, readJsonFile(fileNameWithExpectedJson));
 	}
 
 	public static void assertJsonMatchesExpectedJson(final String actualJson, final String expectedJson) {
