@@ -56,9 +56,7 @@
 	<profiles>
 		<profile>
 			<id>skip-int-tests</id>
-			<activation>
-				<activeByDefault>true</activeByDefault>
-			</activation>
+			
 			<build>
 				<plugins>
 					<plugin>
@@ -85,6 +83,9 @@
 
 		<profile>
 			<id>integrationTests-wildfly</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
 			<properties>
 				<jboss.home>target/wildfly-10.1.0.Final</jboss.home>
 			</properties>
