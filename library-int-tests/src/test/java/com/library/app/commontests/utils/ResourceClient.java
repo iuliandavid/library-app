@@ -42,10 +42,10 @@ public class ResourceClient {
 	}
 
 	public Response postWithFile(final String fileName) {
-		return postWithContent(getRequestFromFileorEmptyIfNullFile(fileName));
+		return postWithContent(getRequestFromFileOrEmptyIfNullFile(fileName));
 	}
 
-	private String getRequestFromFileorEmptyIfNullFile(final String fileName) {
+	private String getRequestFromFileOrEmptyIfNullFile(final String fileName) {
 		if (fileName == null) {
 			return "";
 		}
@@ -54,6 +54,14 @@ public class ResourceClient {
 
 	public Response postWithContent(final String content) {
 		return buildClient().post(Entity.entity(content, MediaType.APPLICATION_JSON));
+	}
+
+	public Response putWithFile(final String fileName) {
+		return putWithContent(getRequestFromFileOrEmptyIfNullFile(fileName));
+	}
+
+	public Response putWithContent(final String content) {
+		return buildClient().put(Entity.entity(content, MediaType.APPLICATION_JSON));
 	}
 
 	public Response get() {
@@ -71,6 +79,10 @@ public class ResourceClient {
 		} catch (final URISyntaxException e) {
 			throw new IllegalArgumentException(e);
 		}
+	}
+
+	public void delete() {
+		buildClient().delete();
 	}
 
 }
