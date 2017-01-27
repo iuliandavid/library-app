@@ -8,8 +8,8 @@
   <artifactId>library-int-tests</artifactId>
   
   <properties>
-		<version.arquillian_core>1.1.5.Final</version.arquillian_core>
-		<version.arquillian.wildfly>8.1.0.Final</version.arquillian.wildfly>
+		<version.arquillian_core>2.0.2.Final</version.arquillian_core>
+		<version.arquillian.wildfly>10.1.0.Final</version.arquillian.wildfly>
 	</properties>
 
 	<dependencies>
@@ -86,7 +86,7 @@
 		<profile>
 			<id>integrationTests-wildfly</id>
 			<properties>
-				<jboss.home>target/wildfly-8.1.0.Final</jboss.home>
+				<jboss.home>target/wildfly-10.1.0.Final</jboss.home>
 			</properties>
 			<build>
 				<testResources>
@@ -186,7 +186,7 @@
 					<dependency>
 						<groupId>org.jboss.arquillian</groupId>
 						<artifactId>arquillian-bom</artifactId>
-						<version>${version.arquillian_core}</version>
+						<version>1.1.12.Final</version>
 						<type>pom</type>
 						<scope>import</scope>
 					</dependency>
@@ -200,9 +200,9 @@
 					<scope>test</scope>
 				</dependency>
 				<dependency>
-					<groupId>org.wildfly</groupId>
+					<groupId>org.wildfly.arquillian</groupId>
 					<artifactId>wildfly-arquillian-container-managed</artifactId>
-					<version>${version.arquillian.wildfly}</version>
+					<version>2.0.2.Final</version>
 					<scope>test</scope>
 				</dependency>
 				<dependency>
