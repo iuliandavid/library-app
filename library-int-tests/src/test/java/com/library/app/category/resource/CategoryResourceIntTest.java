@@ -11,6 +11,7 @@ import static org.junit.Assert.*;
 
 import java.io.File;
 import java.net.URL;
+import java.util.List;
 
 import javax.ws.rs.core.Response;
 
@@ -26,6 +27,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.library.app.category.model.Category;
 import com.library.app.common.json.JsonReader;
@@ -164,6 +166,33 @@ public class CategoryResourceIntTest {
 
 		assertThat(response.getStatus(), is(equalTo(HttpCode.VALIDATION_ERROR.getCode())));
 		assertJsonResponseWithFile(response, "categoryErrorNullName.json");
+	}
+
+	@Test
+	@RunAsClient
+	public void findAllCategories() {
+		resourceClient.resourcePath("DB/" + PATH_RESOURCE).postWithContent("");
+		final Response response = resourceClient.resourcePath(PATH_RESOURCE).get();
+		assertThat(response.getStatus(), is(equalTo(HttpCode.OK.getCode())));
+
+		// Compare the result
+		final JsonObject result = JsonReader.readAsJsonObject(response.readEntity(String.class));
+		final int totalRecords = result.getAsJsonObject("paging").get("totalRecords").getAsInt();
+
+		assertThat(totalRecords, is(equalTo(allCategories().size())));
+
+		final JsonArray categoriesList = result.getAsJsonArray("entries");
+		assertThat(categoriesList.size(), is(equalTo(allCategories().size())));
+
+		final List<Category> expectedOrderCategory = allCategories();
+		expectedOrderCategory.sort((s1, s2) -> s1.getName().compareTo(s2.getName()));
+
+		for (int i = 0; i < expectedOrderCategory.size(); i++) {
+			final Category expectedCategory = expectedOrderCategory.get(i);
+			assertThat(categoriesList.get(i).getAsJsonObject().get("name").getAsString(),
+					is(equalTo(expectedCategory.getName())));
+		}
+
 	}
 
 	private void assertJsonResponseWithFile(final Response response, final String fileName) {
