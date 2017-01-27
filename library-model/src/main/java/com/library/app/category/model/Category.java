@@ -18,7 +18,7 @@ import javax.validation.constraints.Size;
  *
  */
 @Entity
-@Table(name = "category")
+@Table(name = "lib_category")
 public class Category implements Serializable {
 
 	/**
