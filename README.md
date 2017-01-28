@@ -38,47 +38,51 @@ So got to your unzipped WildFly instance
 	
 1. Start the WildFly server witl the **standalone-full.xml** configuration file 
 
-	```sh
-	cd bin
-	./standalone.sh -c=standalone-full.xml
-	```
+```sh
+cd bin
+./standalone.sh -c=standalone-full.xml
+```
 2. In another terminal(command-promt, shell..) login into the CLI(command-line-interface) of WildFly from [wildfly-dir]/bin:
 
-	```sh
+```sh
 	./jboss-cli.sh 
-	```
+```
 	
--- Now in CLI, you must see something like :  
+ Now in CLI, you must see something like :  
 	
 	You are disconnected at the moment. Type 'connect' to connect to the server or 'help' for the list of supported commands.
-	
-	
-	```
-	connect
-	```
-	
-	```
-	module add --name=org.postgresql --resources=/POSTGRESQL_JDBC_JAR_PATH/postgresql-9.4-1206-jdbc42.jar --dependencies=javax.api,javax.transaction.api
-	```
-	
--- Add the driver in WildFly datasource drivers
 
-	```
-	/subsystem=datasources/jdbc-driver=postgresql:add(driver-name=postgresql,driver-module-name=org.postgresql,driver-xa-datasource-class-name=org.postgresql.xa.PGXADataSource)
-	```			
+<file>
+</file>
+
+```sh
+	connect
+```
+
+<file>
+</file>
+
+```sh
+module add --name=org.postgresql --resources=/POSTGRESQL_JDBC_JAR_PATH/postgresql-9.4-1206-jdbc42.jar --dependencies=javax.api,javax.transaction.api
+```
+	
+ Add the driver in WildFly datasource drivers
+
+```sh
+/subsystem=datasources/jdbc-driver=postgresql:add(driver-name=postgresql,driver-module-name=org.postgresql,driver-xa-datasource-class-name=org.postgresql.xa.PGXADataSource)
+```			
 		
--- You must see something like :
-		
+ You must see something like :
 		
 		{"outcome" => "success"}
 		
--- Then you add your datasource 
+ Then you add your datasource 
 		
-	```		
+```sh		
 	data-source add --name=library-pool --driver-name=postgresql --connection-url=jdbc:postgresql://localhost:5432/library --jndi-name=java:jboss/datasources/library --user-name=postgres --password=postgres --jta=true --use-java-context=true --transaction-isolation=TRANSACTION_READ_COMMITTED --min-pool-size=5 --max-pool-size=10 --pool-prefill=true --pool-use-strict-min=false --flush-strategy=FailingConnectionOnly  --validate-on-match=true --background-validation=false --valid-connection-checker-class-name=org.jboss.jca.adapters.jdbc.extensions.postgres.PostgreSQLValidConnectionChecker --exception-sorter-class-name=org.jboss.jca.adapters.jdbc.extensions.postgres.PostgreSQLExceptionSorter --enabled=true
-	```	
+```	
 	
--- If all is OK you should see:
+ If all is OK you should see:
 
 	<subsystem xmlns="urn:jboss:domain:datasources:4.0">
             <datasources>
@@ -91,7 +95,7 @@ So got to your unzipped WildFly instance
                     </security>
                 </datasource>
                 <datasource jta="true" jndi-name="java:jboss/datasources/library" pool-name="library-pool" enabled="true" use-java-context="true">
-                    <connection-url>jdbc:postgresql://localhost:5432/library</connection-url>
+                    <connection-url>jdbc:postgresql://localhost:5433/library</connection-url>
                     <driver>postgresql</driver>
                     <security>
                         <user-name>postgres</user-name>
@@ -115,6 +119,12 @@ So got to your unzipped WildFly instance
             </datasources>
         </subsystem>
         
-	
-	
-	
+###DOCKER CONFIGURATION FOR POSTGRESQL
+
+##INSTALL DOCKER
+https://www.docker.com/products/docker
+##INSTALL POSTGRESQL IMAGE
+```sh
+docker run -p 5433:5432 -name postres-db -d postgres:latest
+```
+__NOTE:__ In this example the PostgreSQL port is forwarded to **5433**
