@@ -9,10 +9,6 @@ import static org.junit.Assert.*;
 
 import java.util.List;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -22,7 +18,7 @@ import com.library.app.author.model.filter.AuthorFilter;
 import com.library.app.common.model.PaginatedData;
 import com.library.app.common.model.filter.PaginationData;
 import com.library.app.common.model.filter.PaginationData.OrderMode;
-import com.library.app.commontests.db.DbCommandTransactionalExecutor;
+import com.library.app.commontests.db.TestBaseRepository;
 
 /**
  * Unit testing for AuthorRepository
@@ -30,36 +26,28 @@ import com.library.app.commontests.db.DbCommandTransactionalExecutor;
  * @author iulian
  *
  */
-public class AuthorRepositoryUTest {
+public class AuthorRepositoryUTest extends TestBaseRepository {
 
-	private EntityManagerFactory emf;
-
-	private EntityManager em;
 	private AuthorRepository authorRepository;
-
-	private DbCommandTransactionalExecutor dbCommandTransactionalExecutor;
 
 	@Before
 	public void initTestCase() {
-		emf = Persistence.createEntityManagerFactory("libraryPU");
-		em = emf.createEntityManager();
+
+		initializeTestDB();
 		authorRepository = new AuthorRepository();
 		authorRepository.em = em;
-
-		dbCommandTransactionalExecutor = new DbCommandTransactionalExecutor(em);
 
 	}
 
 	@After
-	public void closeEntityManager() {
-		em.close();
-		emf.close();
+	public void setDownTestCase() {
+		closeEntityManager();
 	}
 
 	@Test
 	public void addAuthor() {
 
-		final Long authorAddedId = dbCommandTransactionalExecutor
+		final Long authorAddedId = dbCommandExecutor
 				.executeCommand(() -> authorRepository.add(robertMartin()).getId());
 		assertThat(authorAddedId, is(notNullValue()));
 	}
@@ -67,7 +55,7 @@ public class AuthorRepositoryUTest {
 	@Test
 	public void addAuthorAndFindIt() {
 
-		final Long authorAddedId = dbCommandTransactionalExecutor
+		final Long authorAddedId = dbCommandExecutor
 				.executeCommand(() -> authorRepository.add(robertMartin()).getId());
 
 		final Author author = authorRepository.findById(authorAddedId);
@@ -91,14 +79,14 @@ public class AuthorRepositoryUTest {
 	@Test
 	public void updateAuthor() {
 
-		final Long authorAddedId = dbCommandTransactionalExecutor
+		final Long authorAddedId = dbCommandExecutor
 				.executeCommand(() -> authorRepository.add(robertMartin()).getId());
 
 		final Author authorAfterAdd = authorRepository.findById(authorAddedId);
 		assertThat(authorAfterAdd.getName(), is(equalTo(robertMartin().getName())));
 
 		authorAfterAdd.setName(jamesGrowling().getName());
-		final Author authorAfterUpdate = dbCommandTransactionalExecutor
+		final Author authorAfterUpdate = dbCommandExecutor
 				.executeCommand(() -> authorRepository.update(authorAfterAdd));
 
 		assertThat(authorAfterUpdate.getName(), is(equalTo(jamesGrowling().getName())));
@@ -109,7 +97,7 @@ public class AuthorRepositoryUTest {
 	public void findAllAuthors() {
 		// Given
 		// all categories inserted
-		dbCommandTransactionalExecutor.executeCommand(() -> {
+		dbCommandExecutor.executeCommand(() -> {
 			allAuthors().forEach(authorRepository::add);
 			return null;
 		});
@@ -138,7 +126,7 @@ public class AuthorRepositoryUTest {
 
 	@Test
 	public void existsById() {
-		final Long authorAddedId = dbCommandTransactionalExecutor
+		final Long authorAddedId = dbCommandExecutor
 				.executeCommand(() -> authorRepository.add(robertMartin()).getId());
 		assertThat(authorRepository.existsById(authorAddedId), is(equalTo(true)));
 		assertThat(authorRepository.existsById(999L), is(equalTo(false)));
@@ -178,7 +166,7 @@ public class AuthorRepositoryUTest {
 	}
 
 	private void loadDataForFindFilter() {
-		dbCommandTransactionalExecutor.executeCommand(() -> {
+		dbCommandExecutor.executeCommand(() -> {
 			authorRepository.add(robertMartin());
 			authorRepository.add(jamesGrowling());
 			authorRepository.add(martinFowler());
