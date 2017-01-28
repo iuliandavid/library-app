@@ -26,6 +26,7 @@ import com.library.app.category.model.Category;
 import com.library.app.category.services.CategoryServices;
 import com.library.app.common.exception.FieldNotValidException;
 import com.library.app.common.model.HttpCode;
+import com.library.app.commontests.utils.ResourceDefinitions;
 
 /**
  * @author Iulian David
@@ -35,7 +36,7 @@ public class CategoryResourceUTest {
 
 	private CategoryResource categoryResource;
 
-	private static final String PATH_RESOURCE = "categories";
+	private static final String PATH_RESOURCE = ResourceDefinitions.CATEGORY.getResourceName();
 	@Mock
 	private CategoryServices categoryServices;
 

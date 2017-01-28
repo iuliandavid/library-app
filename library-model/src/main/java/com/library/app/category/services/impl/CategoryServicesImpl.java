@@ -7,6 +7,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import javax.ejb.Stateful;
+import javax.ejb.Stateless;
+import javax.inject.Inject;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
 
@@ -18,13 +21,22 @@ import com.library.app.category.services.CategoryServices;
 import com.library.app.common.exception.FieldNotValidException;
 
 /**
+ * Since there is a pool of {@link Stateless} ejbs is more useful and scalable to use the {@link Stateless} instead of
+ * {@link Stateful} EJB
+ * 
  * @author Iulian David david.iulian@gmail.com
  *
  */
+@Stateless
 public class CategoryServicesImpl implements CategoryServices {
 
-	// using javax validator
+	/**
+	 * Using container's own implementation
+	 */
+	@Inject
 	Validator validator;
+
+	@Inject
 	CategoryRepository categoryRepository;
 
 	@Override

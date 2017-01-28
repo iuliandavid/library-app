@@ -2,5 +2,10 @@ language: java
 jdk:
   - oraclejdk8
 sudo: required # slower builds, adds the latest jdk
-script: mvn clean verify install
+
+cache:
+  directories:
+  - $HOME/.m2
+
+
 

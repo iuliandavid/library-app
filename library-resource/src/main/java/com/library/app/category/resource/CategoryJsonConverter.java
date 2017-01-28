@@ -5,6 +5,8 @@ package com.library.app.category.resource;
 
 import java.util.List;
 
+import javax.enterprise.context.ApplicationScoped;
+
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -13,10 +15,13 @@ import com.library.app.common.json.JsonReader;
 
 /**
  * Class for converting a JSON string into a Category
+ * Since this is an utility class we will need only one instance
+ * so it will annotated with {@link ApplicationScoped}
  * 
  * @author iulian
  *
  */
+@ApplicationScoped
 public class CategoryJsonConverter {
 
 	public Category convertFrom(final String json) {

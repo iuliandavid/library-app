@@ -6,7 +6,9 @@ package com.library.app.category.repository;
 import java.util.List;
 import java.util.Objects;
 
+import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 
 import com.library.app.category.model.Category;
@@ -15,8 +17,10 @@ import com.library.app.category.model.Category;
  * @author iulian
  *
  */
+@Stateless
 public class CategoryRepository {
 
+	@PersistenceContext
 	EntityManager em;
 
 	/**
