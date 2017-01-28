@@ -18,6 +18,10 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.library.app.author.model.Author;
+import com.library.app.author.model.filter.AuthorFilter;
+import com.library.app.common.model.PaginatedData;
+import com.library.app.common.model.filter.PaginationData;
+import com.library.app.common.model.filter.PaginationData.OrderMode;
 import com.library.app.commontests.db.DbCommandTransactionalExecutor;
 
 /**
@@ -138,5 +142,49 @@ public class AuthorRepositoryUTest {
 				.executeCommand(() -> authorRepository.add(robertMartin()).getId());
 		assertThat(authorRepository.existsById(authorAddedId), is(equalTo(true)));
 		assertThat(authorRepository.existsById(999L), is(equalTo(false)));
+	}
+
+	@Test
+	public void findFilterNoFilter() {
+		loadDataForFindFilter();
+		final PaginatedData<Author> authors = authorRepository.findByFilter(new AuthorFilter());
+		assertThat(authors.getNumberOfRows(), is(equalTo(4)));
+		assertThat(authors.getRows().size(), is(equalTo(4)));
+		assertThat(authors.getRow(0).getName(), is(equalTo(erichGamma().getName())));
+		assertThat(authors.getRow(1).getName(), is(equalTo(jamesGrowling().getName())));
+		assertThat(authors.getRow(2).getName(), is(equalTo(martinFowler().getName())));
+		assertThat(authors.getRow(3).getName(), is(equalTo(robertMartin().getName())));
+	}
+
+	@Test
+	public void findFilterFilteringByNameAndPaginatingAndOrderingDescending() {
+		loadDataForFindFilter();
+
+		final AuthorFilter authorFilter = new AuthorFilter();
+		authorFilter.setName("o");
+		authorFilter.setPaginationData(new PaginationData(0, 2, "name", OrderMode.DESCENDING));
+		PaginatedData<Author> authors = authorRepository.findByFilter(authorFilter);
+		assertThat(authors.getNumberOfRows(), is(equalTo(3)));
+		assertThat(authors.getRows().size(), is(equalTo(2)));
+		assertThat(authors.getRow(0).getName(), is(equalTo(robertMartin().getName())));
+		assertThat(authors.getRow(1).getName(), is(equalTo(martinFowler().getName())));
+
+		authorFilter.setPaginationData(new PaginationData(2, 2, "name", OrderMode.DESCENDING));
+		authors = authorRepository.findByFilter(authorFilter);
+		assertThat(authors.getNumberOfRows(), is(equalTo(3)));
+		assertThat(authors.getRows().size(), is(equalTo(1)));
+		assertThat(authors.getRow(0).getName(), is(equalTo(jamesGrowling().getName())));
+
+	}
+
+	private void loadDataForFindFilter() {
+		dbCommandTransactionalExecutor.executeCommand(() -> {
+			authorRepository.add(robertMartin());
+			authorRepository.add(jamesGrowling());
+			authorRepository.add(martinFowler());
+			authorRepository.add(erichGamma());
+			return null;
+		});
+
 	}
 }
