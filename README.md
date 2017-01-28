@@ -1,37 +1,38 @@
 [![Build Status](https://travis-ci.org/iuliandavid/library-app.svg?branch=master)](https://travis-ci.org/iuliandavid/library-app)
 
-###library-app
+#library-app
 Implementation of Udemy's Build An Application From Scratch: jee-7-java-8-and-wildfly
 
 
 
-###CONFIG
+#CONFIGURATION
 ## I modified the libraries versions because:
 1. The hibernate version did not compile, as a consequence I used the 4.3.11.Final version
-
-	```
+	
+	
 		<dependency>
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-entitymanager</artifactId>
 			<version>4.3.11.Final</version>
 			<scope>test</scope>
 		</dependency>
-	```
+		
 2. All the other libraries are put up to date
 
-Since I am using WildFly 10.1.0.Final there are some slightly changes to be made so that the tutorial will run:
-## The standalone-full.xml used in Arquillian Integration Tests(module library-int-tests):
+##Since I am using WildFly 10.1.0.Final there are some slightly changes to be made so that the tutorial will run:
+### The standalone-full.xml used in Arquillian Integration Tests(module library-int-tests):
 	
 The file will be copied from the WildFly kit from [http://wildfly.org/downloads/](http://wildfly.org/downloads/), It will be unzipped and the file standalone-full.xml from [wildfly-dir]/standalone/configuration will be copied to [library-int-tests]/src/test/resources/
 	
-	```
+```sh
 	tar xzvf wildfly-10.1.0.Final.tar.gz
 	cd wildfly-10.1.0.Final
 	cp standalone/configuration/standalone-full.xml /path_of_library_app_project/library-int-tests/src/test/resources/
-	```
+```
 	
-## The WildFly server config was made through the jboss_cli(since all of my configs, xml copies, didn't work)
-Notation used: POSTGRESQL_JDBC_JAR_PATH : the path were the Postgresql JDBC jar is located(intentionally i left one in the utils directory)
+### The WildFly server configuration was made through the `jboss_cli`(since all of my configs, xml copies, didn't work)
+
+__Notation used:__ `POSTGRESQL_JDBC_JAR_PATH` : the path were the Postgresql JDBC jar is located(intentionally i left one in the utils directory)
 So got to your unzipped WildFly instance
 
 	cd [wildfly-dir]
@@ -119,7 +120,7 @@ module add --name=org.postgresql --resources=/POSTGRESQL_JDBC_JAR_PATH/postgresq
             </datasources>
         </subsystem>
         
-###DOCKER CONFIGURATION FOR POSTGRESQL
+#DOCKER CONFIGURATION FOR POSTGRESQL
 
 ##INSTALL DOCKER
 https://www.docker.com/products/docker
