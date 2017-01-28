@@ -6,6 +6,7 @@ package com.library.app.author.services.impl;
 import static com.library.app.commontests.author.AuthorForTestsRepository.*;
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import java.util.ArrayList;
@@ -20,9 +21,11 @@ import org.junit.Test;
 
 import com.library.app.author.exception.AuthorNotFoundException;
 import com.library.app.author.model.Author;
+import com.library.app.author.model.filter.AuthorFilter;
 import com.library.app.author.repository.AuthorRepository;
 import com.library.app.author.services.AuthorServices;
 import com.library.app.common.exception.FieldNotValidException;
+import com.library.app.common.model.PaginatedData;
 
 /**
  * Unit Tests for Author Services
@@ -65,7 +68,7 @@ public class AuthorServicesUTest {
 		try {
 			addAuthorWithInvalidName("A");
 		} catch (final FieldNotValidException e) {
-			assertThat(e.getMessage(), is(equalTo("size must be between 2 and 25")));
+			assertThat(e.getMessage(), is(equalTo("size must be between 2 and 40")));
 		}
 
 	}
@@ -75,7 +78,7 @@ public class AuthorServicesUTest {
 		try {
 			addAuthorWithInvalidName("This is a long name that will cause an exception");
 		} catch (final FieldNotValidException e) {
-			assertThat(e.getMessage(), is(equalTo("size must be between 2 and 25")));
+			assertThat(e.getMessage(), is(equalTo("size must be between 2 and 40")));
 		}
 
 	}
@@ -122,7 +125,7 @@ public class AuthorServicesUTest {
 		try {
 			updateAuthorWithInvalidName("A");
 		} catch (final FieldNotValidException e) {
-			assertThat(e.getMessage(), is(equalTo("size must be between 2 and 25")));
+			assertThat(e.getMessage(), is(equalTo("size must be between 2 and 40")));
 		}
 
 	}
@@ -132,7 +135,7 @@ public class AuthorServicesUTest {
 		try {
 			updateAuthorWithInvalidName("This is a long name that will cause an exception");
 		} catch (final FieldNotValidException e) {
-			assertThat(e.getMessage(), is(equalTo("size must be between 2 and 25")));
+			assertThat(e.getMessage(), is(equalTo("size must be between 2 and 40")));
 		}
 
 	}
@@ -158,10 +161,7 @@ public class AuthorServicesUTest {
 			fail("An error should be thrown");
 		} catch (final FieldNotValidException e) {
 			assertThat(e.getFieldName(), is(equalTo("name")));
-			throw e;
-
 		}
-
 	}
 
 	/// Test findByID
@@ -182,6 +182,15 @@ public class AuthorServicesUTest {
 
 		authorServices.findById(1l);
 
+	}
+
+	public void findAuthorByFilter() {
+		final PaginatedData<Author> authors = new PaginatedData<>(1, Arrays.asList(authorWithID(robertMartin(), 1L)));
+		when(authorRepository.findByFilter((AuthorFilter) any())).thenReturn(authors);
+		final PaginatedData<Author> authorsReturned = authorServices.findByFilter(new AuthorFilter());
+
+		assertThat(authorsReturned.getNumberOfRows(), is(equalTo(1)));
+		assertThat(authorsReturned.getRow(0).getName(), is(equalTo(robertMartin().getName())));
 	}
 
 	/// Test findAll

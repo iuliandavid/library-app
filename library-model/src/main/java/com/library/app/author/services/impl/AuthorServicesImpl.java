@@ -3,21 +3,21 @@
  */
 package com.library.app.author.services.impl;
 
-import java.util.Iterator;
+import static com.library.app.common.ValidationUtils.*;
+
 import java.util.List;
-import java.util.Set;
 
 import javax.ejb.Stateful;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
-import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
 
 import com.library.app.author.exception.AuthorNotFoundException;
 import com.library.app.author.model.Author;
+import com.library.app.author.model.filter.AuthorFilter;
 import com.library.app.author.repository.AuthorRepository;
 import com.library.app.author.services.AuthorServices;
-import com.library.app.common.exception.FieldNotValidException;
+import com.library.app.common.model.PaginatedData;
 
 /**
  * Since there is a pool of {@link Stateless} ejbs is more useful and scalable to use the {@link Stateless} instead of
@@ -42,21 +42,9 @@ public class AuthorServicesImpl implements AuthorServices {
 	 * @see com.library.app.author.services.AuthorServices#add(com.library.app.author.model.Author)
 	 */
 	@Override
-	public Author add(final Author author) throws FieldNotValidException, AuthorNotFoundException {
-		validateAuthor(author);
+	public Author add(final Author author) {
+		validateEntityFields(validator, author);
 		return authorRepository.add(author);
-	}
-
-	/**
-	 * @param category
-	 */
-	private void validateAuthor(final Author author) {
-		final Set<ConstraintViolation<Author>> errors = validator.validate(author);
-		final Iterator<ConstraintViolation<Author>> itErrors = errors.iterator();
-		if (itErrors.hasNext()) {
-			final ConstraintViolation<Author> violation = itErrors.next();
-			throw new FieldNotValidException(violation.getPropertyPath().toString(), violation.getMessage());
-		}
 	}
 
 	/*
@@ -65,8 +53,8 @@ public class AuthorServicesImpl implements AuthorServices {
 	 * @see com.library.app.author.services.AuthorServices#update(com.library.app.author.model.Author)
 	 */
 	@Override
-	public void update(final Author author) throws FieldNotValidException, AuthorNotFoundException {
-		validateAuthor(author);
+	public void update(final Author author) {
+		validateEntityFields(validator, author);
 
 		if (!authorRepository.existsById(author.getId())) {
 			throw new AuthorNotFoundException();
@@ -98,6 +86,11 @@ public class AuthorServicesImpl implements AuthorServices {
 	@Override
 	public List<Author> findAll() {
 		return authorRepository.findAll("name");
+	}
+
+	@Override
+	public PaginatedData<Author> findByFilter(final AuthorFilter filter) {
+		return authorRepository.findByFilter(filter);
 	}
 
 }

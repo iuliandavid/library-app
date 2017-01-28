@@ -6,7 +6,9 @@ import javax.ejb.Local;
 
 import com.library.app.author.exception.AuthorNotFoundException;
 import com.library.app.author.model.Author;
+import com.library.app.author.model.filter.AuthorFilter;
 import com.library.app.common.exception.FieldNotValidException;
+import com.library.app.common.model.PaginatedData;
 
 /**
  * The contract for the {@link Author} services
@@ -26,4 +28,6 @@ public interface AuthorServices {
 	Author findById(long id);
 
 	List<Author> findAll();
+
+	PaginatedData<Author> findByFilter(AuthorFilter authorFilter);
 }

@@ -29,7 +29,7 @@ public class Author implements Serializable {
 	private Long id;
 
 	@NotNull(message = "Author Name cannot be null")
-	@Size(min = 2, max = 25)
+	@Size(min = 2, max = 40)
 	private String name;
 
 	/** Default constructor for JPA */
