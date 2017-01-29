@@ -1,7 +1,7 @@
 /**
  * 
  */
-package com.library.app.category;
+package com.library.app.category.exception;
 
 import javax.ejb.ApplicationException;
 

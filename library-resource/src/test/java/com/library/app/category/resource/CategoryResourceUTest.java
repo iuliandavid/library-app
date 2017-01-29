@@ -20,8 +20,8 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import com.library.app.category.CategoryExistentException;
-import com.library.app.category.CategoryNotFoundException;
+import com.library.app.category.exception.CategoryExistentException;
+import com.library.app.category.exception.CategoryNotFoundException;
 import com.library.app.category.model.Category;
 import com.library.app.category.services.CategoryServices;
 import com.library.app.common.exception.FieldNotValidException;

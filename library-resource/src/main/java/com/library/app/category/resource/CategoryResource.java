@@ -22,8 +22,8 @@ import org.slf4j.LoggerFactory;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.library.app.category.CategoryExistentException;
-import com.library.app.category.CategoryNotFoundException;
+import com.library.app.category.exception.CategoryExistentException;
+import com.library.app.category.exception.CategoryNotFoundException;
 import com.library.app.category.model.Category;
 import com.library.app.category.repository.CategoryRepository;
 import com.library.app.category.services.CategoryServices;
