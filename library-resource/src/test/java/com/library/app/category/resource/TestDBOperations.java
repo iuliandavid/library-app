@@ -7,7 +7,7 @@ import javax.inject.Inject;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.Path;
 
-import com.library.app.commontests.db.TestBulkDBOperationsRepository;
+import com.library.app.commontests.db.TestBulkDBOperationsEJB;
 
 /**
  * A helper class for accessin bulk operations on database
@@ -20,7 +20,7 @@ import com.library.app.commontests.db.TestBulkDBOperationsRepository;
 public class TestDBOperations {
 
 	@Inject
-	TestBulkDBOperationsRepository testBulkDBServices;
+	TestBulkDBOperationsEJB testBulkDBServices;
 
 	@DELETE
 	public void deleteAll() {

@@ -12,7 +12,7 @@ import com.library.app.category.model.Category;
 
 /**
  * Helper class for category testing
- * Creates categories that will be used in tests
+ * Creates {@link Category} objects that will be used in tests
  * 
  * @author iulian
  *
@@ -40,7 +40,9 @@ public class CategoryForTestsRepository {
 	}
 
 	/**
-	 * @return
+	 * Generic builder of an {@link Category} instance with id set
+	 * 
+	 * @return a full {@link Category} with all properties set
 	 */
 	public static Category categoryWithID(final Category category, final Long id) {
 		category.setId(id);

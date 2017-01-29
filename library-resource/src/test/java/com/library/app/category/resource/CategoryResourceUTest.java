@@ -29,6 +29,8 @@ import com.library.app.common.model.HttpCode;
 import com.library.app.commontests.utils.ResourceDefinitions;
 
 /**
+ * Unit tests for {@link CategoryResource}
+ * 
  * @author Iulian David
  *
  */
@@ -137,8 +139,7 @@ public class CategoryResourceUTest {
 
 	@Test
 	public void findCategoryNotFound() {
-		doThrow(new CategoryNotFoundException()).when(categoryServices)
-				.update(categoryServices.findById(1l));
+		when(categoryServices.findById(1L)).thenThrow(new CategoryNotFoundException());
 
 		final Response response = categoryResource.findById(1l);
 		assertThat(response.getStatus(), is(equalTo(HttpCode.NOT_FOUND.getCode())));

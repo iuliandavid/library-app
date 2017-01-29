@@ -1,7 +1,7 @@
 /**
  * 
  */
-package com.library.app.category;
+package com.library.app.author.exception;
 
 import javax.ejb.ApplicationException;
 
@@ -15,8 +15,8 @@ import javax.ejb.ApplicationException;
  *
  */
 @ApplicationException
-public class CategoryExistentException extends RuntimeException {
+public class AuthorNotFoundException extends RuntimeException {
 
-	private static final long serialVersionUID = -2471998894249943457L;
+	private static final long serialVersionUID = -7977852928081289967L;
 
 }

@@ -3,14 +3,13 @@
  */
 package com.library.app.category.services.impl;
 
-import java.util.Iterator;
+import static com.library.app.common.ValidationUtils.*;
+
 import java.util.List;
-import java.util.Set;
 
 import javax.ejb.Stateful;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
-import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
 
 import com.library.app.category.CategoryExistentException;
@@ -45,21 +44,6 @@ public class CategoryServicesImpl implements CategoryServices {
 		return categoryRepository.add(category);
 	}
 
-	/**
-	 * @param category
-	 */
-	private void validateCategory(final Category category) {
-		final Set<ConstraintViolation<Category>> errors = validator.validate(category);
-		final Iterator<ConstraintViolation<Category>> itErrors = errors.iterator();
-		if (itErrors.hasNext()) {
-			final ConstraintViolation<Category> violation = itErrors.next();
-			throw new FieldNotValidException(violation.getPropertyPath().toString(), violation.getMessage());
-		}
-		if (categoryRepository.alreadyExists(category)) {
-			throw new CategoryExistentException();
-		}
-	}
-
 	@Override
 	public void update(final Category category) {
 		validateCategory(category);
@@ -85,4 +69,11 @@ public class CategoryServicesImpl implements CategoryServices {
 		return categoryRepository.findAll("name");
 	}
 
+	private void validateCategory(final Category category) {
+		validateEntityFields(validator, category);
+
+		if (categoryRepository.alreadyExists(category)) {
+			throw new CategoryExistentException();
+		}
+	}
 }
