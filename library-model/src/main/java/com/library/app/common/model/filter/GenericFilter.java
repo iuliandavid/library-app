@@ -31,7 +31,7 @@ public class GenericFilter {
 		return getPaginationData() != null;
 	}
 
-	public boolean hasOrderFiled() {
+	public boolean hasOrderField() {
 		return hasPaginationData() && getPaginationData().getOrderField() != null;
 	}
 

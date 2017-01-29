@@ -90,7 +90,7 @@ public class AuthorServicesUTest {
 	@Test
 	public void addValidAuthor() {
 
-		when(authorRepository.add(robertMartin())).thenReturn(authorWithID(robertMartin(), 1L));
+		when(authorRepository.add(robertMartin())).thenReturn(authorWithId(robertMartin(), 1L));
 		final Author authorAdded = authorServices.add(robertMartin());
 		assertThat(authorAdded.getId(), is(equalTo(1l)));
 	}
@@ -143,16 +143,16 @@ public class AuthorServicesUTest {
 	@Test(expected = AuthorNotFoundException.class)
 	public void updateCategoryNotFound() {
 		when(authorRepository.existsById(1l)).thenReturn(false);
-		authorServices.update(authorWithID(robertMartin(), 1l));
+		authorServices.update(authorWithId(robertMartin(), 1l));
 	}
 
 	@Test
 	public void updateValidAuthor() {
 		when(authorRepository.existsById(1l)).thenReturn(true);
-		authorServices.update(authorWithID(robertMartin(), 1l));
+		authorServices.update(authorWithId(robertMartin(), 1l));
 
 		// verify that authorRepository.update was invoked
-		verify(authorRepository).update(authorWithID(robertMartin(), 1l));
+		verify(authorRepository).update(authorWithId(robertMartin(), 1l));
 	}
 
 	private void updateAuthorWithInvalidName(final String name) {
@@ -167,7 +167,7 @@ public class AuthorServicesUTest {
 	/// Test findByID
 	@Test
 	public void findAuthorById() {
-		final Author mockedAuthor = authorWithID(robertMartin(), 1L);
+		final Author mockedAuthor = authorWithId(robertMartin(), 1L);
 		when(authorRepository.findById(1l)).thenReturn(mockedAuthor);
 
 		final Author author = authorServices.findById(1l);
@@ -185,7 +185,7 @@ public class AuthorServicesUTest {
 	}
 
 	public void findAuthorByFilter() {
-		final PaginatedData<Author> authors = new PaginatedData<>(1, Arrays.asList(authorWithID(robertMartin(), 1L)));
+		final PaginatedData<Author> authors = new PaginatedData<>(1, Arrays.asList(authorWithId(robertMartin(), 1L)));
 		when(authorRepository.findByFilter((AuthorFilter) any())).thenReturn(authors);
 		final PaginatedData<Author> authorsReturned = authorServices.findByFilter(new AuthorFilter());
 
@@ -205,7 +205,7 @@ public class AuthorServicesUTest {
 	@Test
 	public void findAllAuthors() {
 		when(authorRepository.findAll("name"))
-				.thenReturn(Arrays.asList(authorWithID(robertMartin(), 1l), authorWithID(johnBrandt(), 2l)));
+				.thenReturn(Arrays.asList(authorWithId(robertMartin(), 1l), authorWithId(johnBrandt(), 2l)));
 		final List<Author> authors = authorServices.findAll();
 		assertThat(authors.size(), is(equalTo(2)));
 		assertThat(authors.get(0).getName(), is(equalTo(robertMartin().getName())));

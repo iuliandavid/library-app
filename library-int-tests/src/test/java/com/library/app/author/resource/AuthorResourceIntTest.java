@@ -1,9 +1,9 @@
 /**
  * 
  */
-package com.library.app.category.resource;
+package com.library.app.author.resource;
 
-import static com.library.app.commontests.category.CategoryForTestsRepository.*;
+import static com.library.app.commontests.author.AuthorForTestsRepository.*;
 import static com.library.app.commontests.utils.FileTestNameUtils.*;
 import static com.library.app.commontests.utils.JsonTestUtils.*;
 import static org.hamcrest.CoreMatchers.*;
@@ -21,10 +21,12 @@ import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import com.library.app.category.model.Category;
+import com.library.app.author.model.Author;
 import com.library.app.common.json.JsonReader;
 import com.library.app.common.model.HttpCode;
 import com.library.app.commontests.utils.ArquillianTestUtils;
@@ -55,10 +57,11 @@ import com.library.app.commontests.utils.ResourceDefinitions;
  *
  */
 @RunWith(Arquillian.class)
-public class CategoryResourceIntTest {
+public class AuthorResourceIntTest {
 
 	private static final String DATABASE_BULK_OPERATIONS = "/DB";
 
+	private final Logger logger = LoggerFactory.getLogger(AuthorResourceIntTest.class);
 	/**
 	 * We don't know the url resource(aquillian creates one at runtime) that why we let Arquillian decide
 	 * The @ArquillianResource will inject the created URL
@@ -68,7 +71,7 @@ public class CategoryResourceIntTest {
 
 	private ResourceClient resourceClient;
 
-	private static final String PATH_RESOURCE = ResourceDefinitions.CATEGORY.getResourceName();
+	private static final String PATH_RESOURCE = ResourceDefinitions.AUTHOR.getResourceName();
 
 	@Deployment
 	public static WebArchive createDeployment() {
@@ -84,116 +87,97 @@ public class CategoryResourceIntTest {
 
 	@Test
 	@RunAsClient
-	public void addValidCategoryAndFindIt() {
-
-		// since the response will be a String we will read the Body (response.readEntity) as String
-		final Long id = addCategoryAndGetId("category.json");
-
-		findCategoryAndAssertResponseWithCategory(id, java());
+	public void addvalidAuthorAndFindIt() {
+		final Long authorId = addAuthorAndGetId("robertMartin.json");
+		findAuthorAndAssertResponseWithAuthor(authorId, robertMartin());
 	}
 
 	@Test
 	@RunAsClient
-	public void addExistentCategory() {
-		resourceClient.resourcePath(PATH_RESOURCE).postWithFile(getPathFileRequest(PATH_RESOURCE, "category.json"));
+	public void addAuthroWithNullName() {
+		final Response response = resourceClient.resourcePath(PATH_RESOURCE)
+				.postWithFile(getPathFileRequest(PATH_RESOURCE, "authorWithNullName.json"));
 
-		final Response response = resourceClient.resourcePath(PATH_RESOURCE).postWithFile(
-				getPathFileRequest(PATH_RESOURCE, "category.json"));
 		assertThat(response.getStatus(), is(equalTo(HttpCode.VALIDATION_ERROR.getCode())));
-		assertJsonResponseWithFile(response, "categoryAlreadyExists.json");
+		assertJsonResponseWithFile(response, "authorErrorNullName.json");
 	}
 
 	@Test
 	@RunAsClient
-	public void updateValidCategory() {
-		final Long id = addCategoryAndGetId("category.json");
-		findCategoryAndAssertResponseWithCategory(id, java());
+	public void updateValidAuthor() {
+		final Long id = addAuthorAndGetId("robertMartin.json");
+		findAuthorAndAssertResponseWithAuthor(id, robertMartin());
 
 		final Response response = resourceClient.resourcePath(PATH_RESOURCE + "/" + id).putWithFile(
-				getPathFileRequest(PATH_RESOURCE, "categoryCleanCode.json"));
+				getPathFileRequest(PATH_RESOURCE, "uncleBob.json"));
 		assertThat(response.getStatus(), is(equalTo(HttpCode.OK.getCode())));
 
-		findCategoryAndAssertResponseWithCategory(id, cleanCode());
+		final Author uncleBob = new Author("Uncle Bob");
+		uncleBob.setId(id);
+		findAuthorAndAssertResponseWithAuthor(id, uncleBob);
 	}
 
 	@Test
 	@RunAsClient
-	public void updateCategoryWithNameBelongingToOtherCategory() {
-		final Long javaCategoryId = addCategoryAndGetId("category.json");
-		addCategoryAndGetId("categoryCleanCode.json");
-
-		final Response response = resourceClient.resourcePath(PATH_RESOURCE + "/" + javaCategoryId).putWithFile(
-				getPathFileRequest(PATH_RESOURCE, "categoryCleanCode.json"));
-		assertThat(response.getStatus(), is(equalTo(HttpCode.VALIDATION_ERROR.getCode())));
-		assertJsonResponseWithFile(response, "categoryAlreadyExists.json");
-	}
-
-	@Test
-	@RunAsClient
-	public void updateCategoryNotFound() {
+	public void updateAuthorNotFound() {
 		final Response response = resourceClient.resourcePath(PATH_RESOURCE + "/999").putWithFile(
-				getPathFileRequest(PATH_RESOURCE, "category.json"));
+				getPathFileRequest(PATH_RESOURCE, "robertMartin.json"));
 		assertThat(response.getStatus(), is(equalTo(HttpCode.NOT_FOUND.getCode())));
 	}
 
 	@Test
 	@RunAsClient
-	public void findCategoryNotFound() {
+	public void findAuthorNotFound() {
 		final Response response = resourceClient.resourcePath(PATH_RESOURCE + "/999").get();
 		assertThat(response.getStatus(), is(equalTo(HttpCode.NOT_FOUND.getCode())));
 	}
 
-	/**
-	 * 
-	 */
 	@Test
 	@RunAsClient
-	public void addCategoryWithNullName() {
-		final Response response = resourceClient.resourcePath(PATH_RESOURCE)
-				.postWithFile(getPathFileRequest(PATH_RESOURCE, "categoryWithNullName.json"));
-
-		assertThat(response.getStatus(), is(equalTo(HttpCode.VALIDATION_ERROR.getCode())));
-		assertJsonResponseWithFile(response, "categoryErrorNullName.json");
-	}
-
-	@Test
-	@RunAsClient
-	public void findAllCategories() {
+	public void findByFilterAndPaginationAndOrderingDescendingByName() {
 		resourceClient.resourcePath("DB/" + PATH_RESOURCE).postWithContent("");
-		final Response response = resourceClient.resourcePath(PATH_RESOURCE).get();
+		final int expectedRows = 10;
+		// first page
+		Response response = resourceClient
+				.resourcePath(PATH_RESOURCE + "?page=0&per_page=" + expectedRows + "&sort=-name").get();
 		assertThat(response.getStatus(), is(equalTo(HttpCode.OK.getCode())));
+		assertResponseContainsTheAuthors(response, 12, williamOpdyke(),
+				robertMartin(), richardHelm(), ralphJohnson(), martinFowler(),
+				kentBeck(), joshuaBlock(), johnVlissides(), johnBrandt(),
+				jamesGosling());
 
-		assertResponseContainsTheCategories(response, 4, architecture(), cleanCode(), java(), networks());
-
+		response = resourceClient
+				.resourcePath(PATH_RESOURCE + "?page=1&per_page=" + expectedRows + "&sort=-name").get();
+		assertThat(response.getStatus(), is(equalTo(HttpCode.OK.getCode())));
+		assertResponseContainsTheAuthors(response, 12, erichGamma(), donRoberts());
 	}
 
 	private void assertJsonResponseWithFile(final Response response, final String fileName) {
-		// !!!!!Since the response ise set to Unknown(wildfly 8) or Unreadable Entity(wildfly 10) we must USE
+		// !!!!!Since the response is set to Unknown(WildFly 8) or Unreadable Entity(WildFly 10) we must USE
 		// response.readEntity(String.class)
 		assertJsonMatchesFileContent(response.readEntity(String.class), getPathFileResponse(PATH_RESOURCE, fileName));
 	}
 
-	private Long addCategoryAndGetId(final String fileName) {
+	private Long addAuthorAndGetId(final String fileName) {
 		return IntegrationTestUtils.addElementWithFileAndGetId(resourceClient, PATH_RESOURCE, PATH_RESOURCE, fileName);
 	}
 
-	private void findCategoryAndAssertResponseWithCategory(final Long categoryIdToBeFound,
-			final Category expectedCategory) {
-		final String json = IntegrationTestUtils.findById(resourceClient, PATH_RESOURCE, categoryIdToBeFound);
+	private void findAuthorAndAssertResponseWithAuthor(final Long authorIdToBeFound,
+			final Author expectedAuthor) {
+		final String json = IntegrationTestUtils.findById(resourceClient, PATH_RESOURCE, authorIdToBeFound);
 
 		final JsonObject categoryAsJson = JsonReader.readAsJsonObject(json);
-		assertThat(JsonReader.getStringOrNull(categoryAsJson, "name"), is(equalTo(expectedCategory.getName())));
+		assertThat(JsonReader.getStringOrNull(categoryAsJson, "name"), is(equalTo(expectedAuthor.getName())));
 	}
 
-	private void assertResponseContainsTheCategories(final Response response, final int expectedTotalRecords,
-			final Category... expectedCategories) {
-		final JsonArray categoryList = IntegrationTestUtils.assertJsonHasTheNumberOfElementsAndReturnTheEntries(
-				response,
-				expectedTotalRecords, expectedCategories.length);
-		for (int i = 0; i < expectedCategories.length; i++) {
-			final Category expectedCategory = expectedCategories[i];
-			assertThat(categoryList.get(i).getAsJsonObject().get("name").getAsString(),
-					is(equalTo(expectedCategory.getName())));
+	private void assertResponseContainsTheAuthors(final Response response, final int expectedTotalRecords,
+			final Author... expectedAuthors) {
+		final JsonArray authorsList = IntegrationTestUtils.assertJsonHasTheNumberOfElementsAndReturnTheEntries(response,
+				expectedTotalRecords, expectedAuthors.length);
+		for (int i = 0; i < expectedAuthors.length; i++) {
+			final Author expectedAuthor = expectedAuthors[i];
+			assertThat(authorsList.get(i).getAsJsonObject().get("name").getAsString(),
+					is(equalTo(expectedAuthor.getName())));
 		}
 	}
 }

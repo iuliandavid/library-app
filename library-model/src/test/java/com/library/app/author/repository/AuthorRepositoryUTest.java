@@ -85,11 +85,11 @@ public class AuthorRepositoryUTest extends TestBaseRepository {
 		final Author authorAfterAdd = authorRepository.findById(authorAddedId);
 		assertThat(authorAfterAdd.getName(), is(equalTo(robertMartin().getName())));
 
-		authorAfterAdd.setName(jamesGrowling().getName());
+		authorAfterAdd.setName(jamesGosling().getName());
 		final Author authorAfterUpdate = dbCommandExecutor
 				.executeCommand(() -> authorRepository.update(authorAfterAdd));
 
-		assertThat(authorAfterUpdate.getName(), is(equalTo(jamesGrowling().getName())));
+		assertThat(authorAfterUpdate.getName(), is(equalTo(jamesGosling().getName())));
 
 	}
 
@@ -139,7 +139,7 @@ public class AuthorRepositoryUTest extends TestBaseRepository {
 		assertThat(authors.getNumberOfRows(), is(equalTo(4)));
 		assertThat(authors.getRows().size(), is(equalTo(4)));
 		assertThat(authors.getRow(0).getName(), is(equalTo(erichGamma().getName())));
-		assertThat(authors.getRow(1).getName(), is(equalTo(jamesGrowling().getName())));
+		assertThat(authors.getRow(1).getName(), is(equalTo(jamesGosling().getName())));
 		assertThat(authors.getRow(2).getName(), is(equalTo(martinFowler().getName())));
 		assertThat(authors.getRow(3).getName(), is(equalTo(robertMartin().getName())));
 	}
@@ -161,14 +161,14 @@ public class AuthorRepositoryUTest extends TestBaseRepository {
 		authors = authorRepository.findByFilter(authorFilter);
 		assertThat(authors.getNumberOfRows(), is(equalTo(3)));
 		assertThat(authors.getRows().size(), is(equalTo(1)));
-		assertThat(authors.getRow(0).getName(), is(equalTo(jamesGrowling().getName())));
+		assertThat(authors.getRow(0).getName(), is(equalTo(jamesGosling().getName())));
 
 	}
 
 	private void loadDataForFindFilter() {
 		dbCommandExecutor.executeCommand(() -> {
 			authorRepository.add(robertMartin());
-			authorRepository.add(jamesGrowling());
+			authorRepository.add(jamesGosling());
 			authorRepository.add(martinFowler());
 			authorRepository.add(erichGamma());
 			return null;

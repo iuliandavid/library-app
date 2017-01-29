@@ -27,30 +27,41 @@ public class AuthorRepository extends GenericRepository<Author> {
 	@PersistenceContext
 	EntityManager em;
 
+	@Override
+	protected Class<Author> getPersistentClass() {
+		return Author.class;
+	}
+
+	@Override
+	protected EntityManager getEntityManager() {
+		return em;
+	}
+
 	@SuppressWarnings("unchecked")
 	public PaginatedData<Author> findByFilter(final AuthorFilter filter) {
-
 		final StringBuilder clause = new StringBuilder("WHERE e.id is not null");
 		final Map<String, Object> queryParameters = new HashMap<>();
 		if (filter.getName() != null) {
 			clause.append(" AND UPPER(e.name) LIKE UPPER(:name)");
 			queryParameters.put("name", "%" + filter.getName() + "%");
 		}
+
 		final StringBuilder clauseSort = new StringBuilder();
-		if (filter.getName() != null) {
-			clauseSort.append(" ORDER BY e." + filter.getPaginationData().getOrderField());
-			// then we add ORDERING
-			clauseSort.append(filter.getPaginationData().isAscending() ? " ASC " : " DESC");
+		// then we add ORDERING
+		if (filter.hasOrderField()) {
+			clauseSort.append("ORDER by e." + filter.getPaginationData().getOrderField());
+			clauseSort.append(filter.getPaginationData().isAscending() ? " ASC" : " DESC");
 		} else {
-			clauseSort.append(" ORDER BY e.name ASC");
+			clauseSort.append("ORDER by e.name ASC");
 		}
-		final Query queryAuthors = em
-				.createQuery("SELECT e FROM Author e " + clause.toString() + " " + clauseSort.toString());
+
+		final Query queryAuthors = em.createQuery("SELECT e FROM Author e " + clause.toString() + " "
+				+ clauseSort.toString());
+		applyQueryParametersOnQuery(queryParameters, queryAuthors);
 		if (filter.hasPaginationData()) {
 			queryAuthors.setFirstResult(filter.getPaginationData().getFirstResult());
 			queryAuthors.setMaxResults(filter.getPaginationData().getMaxResults());
 		}
-		applyQueryParametersOnQuery(queryParameters, queryAuthors);
 
 		final List<Author> authors = queryAuthors.getResultList();
 
@@ -60,7 +71,7 @@ public class AuthorRepository extends GenericRepository<Author> {
 
 		final Integer count = ((Long) queryCount.getSingleResult()).intValue();
 
-		return new PaginatedData<>(count, authors);
+		return new PaginatedData<Author>(count, authors);
 	}
 
 	/**
@@ -73,13 +84,4 @@ public class AuthorRepository extends GenericRepository<Author> {
 		});
 	}
 
-	@Override
-	protected Class<Author> getPersistentClass() {
-		return Author.class;
-	}
-
-	@Override
-	protected EntityManager getEntityManager() {
-		return em;
-	}
 }

@@ -28,8 +28,8 @@ public class AuthorForTestsRepository {
 		return new Author("Robert Martin");
 	}
 
-	public static Author jamesGrowling() {
-		return new Author("James Growling");
+	public static Author jamesGosling() {
+		return new Author("James Gosling");
 	}
 
 	public static Author martinFowler() {
@@ -68,11 +68,15 @@ public class AuthorForTestsRepository {
 		return new Author("Joshua Block");
 	}
 
+	public static Author donRoberts() {
+		return new Author("Don Roberts");
+	}
+
 	public static List<Author> allAuthors() {
-		return Arrays.asList(robertMartin(), jamesGrowling(), martinFowler(),
+		return Arrays.asList(robertMartin(), jamesGosling(), martinFowler(),
 				erichGamma(), richardHelm(), ralphJohnson(),
 				johnVlissides(), kentBeck(), johnBrandt(),
-				williamOpdyke(), joshuaBlock());
+				williamOpdyke(), joshuaBlock(), donRoberts());
 	}
 
 	/**
@@ -80,7 +84,7 @@ public class AuthorForTestsRepository {
 	 * 
 	 * @return a full {@link Author} with all properties set
 	 */
-	public static Author authorWithID(final Author author, final Long id) {
+	public static Author authorWithId(final Author author, final Long id) {
 		author.setId(id);
 		return author;
 	}

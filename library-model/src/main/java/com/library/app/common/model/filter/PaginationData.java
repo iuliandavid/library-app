@@ -76,7 +76,7 @@ public class PaginationData {
 	}
 
 	public boolean isAscending() {
-		return (orderMode == OrderMode.ASCENDING);
+		return OrderMode.ASCENDING.equals(orderMode);
 	}
 
 }

@@ -1,0 +1,4 @@
+{
+    "errorIdentification": "author.invalidField.name",
+    "errorDescription": "Author Name cannot be null"
+}
