@@ -126,6 +126,6 @@ module add --name=org.postgresql --resources=/POSTGRESQL_JDBC_JAR_PATH/postgresq
 https://www.docker.com/products/docker
 ##INSTALL POSTGRESQL IMAGE
 ```sh
-docker run -p 5433:5432 -name postres-db -d postgres:latest
+docker run -p 5433:5432 --name postres9.4-db -d postgres:9.4
 ```
 __NOTE:__ In this example the PostgreSQL port is forwarded to **5433**
