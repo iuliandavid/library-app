@@ -9,6 +9,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -18,7 +19,7 @@ import javax.validation.constraints.Size;
  *
  */
 @Entity
-@Table(name = "lib_author")
+@Table(name = "lib_author", indexes = { @Index(columnList = "name") })
 public class Author implements Serializable {
 
 	/** The serial ID, needed especially for the JMS in WildFly */
