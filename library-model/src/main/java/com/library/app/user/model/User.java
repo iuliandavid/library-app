@@ -55,13 +55,13 @@ public abstract class User implements Serializable {
 	@Size(min = 3, max = 40)
 	private String name;
 
-	@Email
+	@Email(message = "email cannot be null")
 	@NotNull
 	@Column(unique = true)
 	@Size(max = 70)
 	private String email;
 
-	@NotNull
+	@NotNull(message = "password cannot be null")
 	private String password;
 
 	public enum Roles {
