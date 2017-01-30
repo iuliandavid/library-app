@@ -3,16 +3,15 @@
  */
 package com.library.app.user.services.impl;
 
-import static com.library.app.common.ValidationUtils.*;
-
 import javax.ejb.Stateful;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.validation.Validator;
 
-import com.library.app.common.ValidationUtils;
 import com.library.app.common.exception.FieldNotValidException;
 import com.library.app.common.model.PaginatedData;
+import com.library.app.common.utils.PasswordUtils;
+import com.library.app.common.utils.ValidationUtils;
 import com.library.app.user.exception.UserExistentException;
 import com.library.app.user.exception.UserNotFoundException;
 import com.library.app.user.model.User;
@@ -44,7 +43,8 @@ public class UserServicesImpl implements UserServices {
 	 */
 	@Override
 	public User add(final User user) throws FieldNotValidException, UserNotFoundException {
-		ValidationUtils.validateEntityFields(validator, user);
+		validateUser(user);
+		user.setPassword(PasswordUtils.encryptPassword(user.getPassword()));
 		return userRepository.add(user);
 	}
 
@@ -55,15 +55,16 @@ public class UserServicesImpl implements UserServices {
 	 */
 	@Override
 	public void update(final User user) throws FieldNotValidException, UserNotFoundException {
-		validateEntityFields(validator, user);
+
+		final User existentUser = userRepository.findById(user.getId());
+		user.setPassword(existentUser.getPassword());
+
+		validateUser(user);
 
 		if (!userRepository.existsById(user.getId())) {
 			throw new UserNotFoundException();
 		}
 
-		if (userRepository.alreadyExists(user)) {
-			throw new UserExistentException();
-		}
 		userRepository.update(user);
 	}
 
@@ -74,8 +75,11 @@ public class UserServicesImpl implements UserServices {
 	 */
 	@Override
 	public User findById(final long id) {
-		// TODO Auto-generated method stub
-		return null;
+		final User user = userRepository.findById(id);
+		if (user == null) {
+			throw new UserNotFoundException();
+		}
+		return user;
 	}
 
 	/*
@@ -89,4 +93,16 @@ public class UserServicesImpl implements UserServices {
 		return null;
 	}
 
+	private void validateUser(final User user) {
+		if (userRepository.alreadyExists(user)) {
+			throw new UserExistentException();
+		}
+		ValidationUtils.validateEntityFields(validator, user);
+	}
+
+	@Override
+	public void updatePassword(final long id, final String password) {
+		// userRepository.
+
+	}
 }

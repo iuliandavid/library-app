@@ -26,4 +26,6 @@ public interface UserServices {
 	User findById(long id);
 
 	PaginatedData<User> findByFilter(UserFilter userFilter);
+
+	void updatePassword(long id, String password);
 }

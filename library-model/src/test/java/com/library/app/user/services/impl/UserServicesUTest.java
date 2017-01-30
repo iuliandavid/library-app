@@ -3,6 +3,7 @@
  */
 package com.library.app.user.services.impl;
 
+import static com.library.app.commontests.user.UserArgumentMatcher.*;
 import static com.library.app.commontests.user.UserForTestsRepository.*;
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
@@ -15,6 +16,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.library.app.common.exception.FieldNotValidException;
+import com.library.app.user.exception.UserExistentException;
+import com.library.app.user.exception.UserNotFoundException;
 import com.library.app.user.model.User;
 import com.library.app.user.repository.UserRepository;
 import com.library.app.user.services.UserServices;
@@ -81,6 +84,85 @@ public class UserServicesUTest {
 		final User user = johnDoe();
 		user.setPassword(null);
 		addUserWithInvalidField(user, "password");
+
+	}
+
+	@Test(expected = UserExistentException.class)
+	public void addExistentUser() {
+		when(userRepository.alreadyExists(johnDoe())).thenThrow(new UserExistentException());
+
+		userServices.add(johnDoe());
+
+	}
+
+	@Test
+	public void addValidUser() {
+		when(userRepository.alreadyExists(johnDoe())).thenReturn(false);
+
+		when(userRepository.add(userEq(userWithEncryptedPassword(johnDoe()))))
+				.thenReturn(userWithIdAndCreatedAt(johnDoe(), 1L));
+
+		final User user = userServices.add(johnDoe());
+		assertThat(user, is(notNullValue()));
+		assertThat(user.getId(), is(equalTo(1l)));
+	}
+
+	@Test(expected = UserNotFoundException.class)
+	public void findUserByIdNotFound() {
+		when(userRepository.findById(1L)).thenReturn(null);
+		userServices.findById(1l);
+	}
+
+	@Test
+	public void findUserById() {
+		when(userRepository.findById(1L)).thenReturn(userWithIdAndCreatedAt(johnDoe(), 1l));
+		final User user = userServices.findById(1L);
+		assertThat(user, is(notNullValue()));
+		assertThat(user.getName(), is(equalTo(johnDoe().getName())));
+	}
+
+	@Test
+	public void updateUserWithNullName() {
+		when(userRepository.findById(1L)).thenReturn(userWithIdAndCreatedAt(johnDoe(), 1l));
+		final User user = userWithIdAndCreatedAt(johnDoe(), 1l);
+		user.setName(null);
+		try {
+			userServices.update(user);
+		} catch (final FieldNotValidException e) {
+			assertThat(e.getFieldName(), is(equalTo("name")));
+		}
+
+	}
+
+	@Test(expected = UserExistentException.class)
+	public void updateUserExistent() {
+		when(userRepository.findById(1L)).thenReturn(userWithIdAndCreatedAt(johnDoe(), 1l));
+
+		final User user = userWithIdAndCreatedAt(johnDoe(), 1l);
+		when(userRepository.alreadyExists(user)).thenReturn(true);
+		userServices.update(user);
+
+	}
+
+	@Test(expected = UserNotFoundException.class)
+	public void updateUserNotFound() {
+		when(userRepository.findById(1L)).thenReturn(null);
+
+		final User user = userWithIdAndCreatedAt(johnDoe(), 1l);
+		userServices.update(user);
+
+	}
+
+	public void updateValidUser() {
+
+		when(userRepository.findById(1L)).thenReturn(userWithIdAndCreatedAt(johnDoe(), 1L));
+
+		final User user = userWithIdAndCreatedAt(johnDoe(), 1l);
+		user.setPassword(null);
+		userServices.update(user);
+
+		final User expectedUser = userWithIdAndCreatedAt(johnDoe(), 1l);
+		verify(userRepository).update(userEq(expectedUser));
 
 	}
 

@@ -3,7 +3,7 @@
  */
 package com.library.app.category.services.impl;
 
-import static com.library.app.common.ValidationUtils.*;
+import static com.library.app.common.utils.ValidationUtils.*;
 
 import java.util.List;
 
