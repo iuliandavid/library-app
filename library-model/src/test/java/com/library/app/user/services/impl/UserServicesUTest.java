@@ -16,6 +16,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.library.app.common.exception.FieldNotValidException;
+import com.library.app.common.utils.PasswordUtils;
 import com.library.app.user.exception.UserExistentException;
 import com.library.app.user.exception.UserNotFoundException;
 import com.library.app.user.model.User;
@@ -162,6 +163,20 @@ public class UserServicesUTest {
 		userServices.update(user);
 
 		final User expectedUser = userWithIdAndCreatedAt(johnDoe(), 1l);
+		verify(userRepository).update(userEq(expectedUser));
+
+	}
+
+	public void updatePassword() {
+
+		final User user = userWithIdAndCreatedAt(johnDoe(), 1l);
+
+		when(userRepository.findById(1L)).thenReturn(user);
+
+		userServices.updatePassword(1l, "654654");
+
+		final User expectedUser = userWithIdAndCreatedAt(johnDoe(), 1l);
+		expectedUser.setPassword(PasswordUtils.encryptPassword("6546541"));
 		verify(userRepository).update(userEq(expectedUser));
 
 	}
