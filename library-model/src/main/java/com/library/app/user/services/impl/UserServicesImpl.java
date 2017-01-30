@@ -56,14 +56,10 @@ public class UserServicesImpl implements UserServices {
 	@Override
 	public void update(final User user) throws FieldNotValidException, UserNotFoundException {
 
-		final User existentUser = userRepository.findById(user.getId());
+		final User existentUser = findById(user.getId());
 		user.setPassword(existentUser.getPassword());
 
 		validateUser(user);
-
-		if (!userRepository.existsById(user.getId())) {
-			throw new UserNotFoundException();
-		}
 
 		userRepository.update(user);
 	}
@@ -89,8 +85,7 @@ public class UserServicesImpl implements UserServices {
 	 */
 	@Override
 	public PaginatedData<User> findByFilter(final UserFilter userFilter) {
-		// TODO Auto-generated method stub
-		return null;
+		return userRepository.findByFilter(userFilter);
 	}
 
 	private void validateUser(final User user) {
@@ -102,7 +97,29 @@ public class UserServicesImpl implements UserServices {
 
 	@Override
 	public void updatePassword(final long id, final String password) {
-		// userRepository.
+		final User user = findById(id);
+		user.setPassword(PasswordUtils.encryptPassword(password));
+		validateUser(user);
 
+		userRepository.update(user);
+	}
+
+	@Override
+	public User findUserByEmail(final String email) {
+		final User user = userRepository.findByEmail(email);
+		if (user == null) {
+			throw new UserNotFoundException();
+		}
+		return user;
+
+	}
+
+	@Override
+	public User findUserByEmailAndPassword(final String email, final String password) {
+		final User user = findUserByEmail(email);
+		if (!user.getPassword().equals(PasswordUtils.encryptPassword(password))) {
+			throw new UserNotFoundException();
+		}
+		return user;
 	}
 }

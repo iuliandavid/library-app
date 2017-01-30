@@ -28,4 +28,8 @@ public interface UserServices {
 	PaginatedData<User> findByFilter(UserFilter userFilter);
 
 	void updatePassword(long id, String password);
+
+	User findUserByEmail(String email);
+
+	User findUserByEmailAndPassword(String email, String password);
 }
