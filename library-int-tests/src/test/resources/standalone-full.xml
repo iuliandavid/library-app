@@ -380,6 +380,19 @@
                         <auth-module code="Dummy"/>
                     </authentication-jaspi>
                 </security-domain>
+                <security-domain name="library" cache-type="default">
+                <authentication>
+                	<login-module code="Database" flag="required">
+                		<module-option name="dsJdniName" value="java:jboss/datasources/ExampleDS"></module-option>
+                		<module-option name="principalsQuery" value="select password from users where email=?"></module-option>
+                		<module-option name="rolesQuery" value="select role,'Roles' from user_role ur inner join users on u.id=ur.user_id where u.email=?"></module-option>
+                		<module-option name="hashAlgorithm" value="SHA-256"></module-option>
+                		<module-option name="hashEncoding" value="BASE64"></module-option>
+                		<module-option name="hashStorePassword" value="false"></module-option>
+                		<module-option name="hashUserPassword" value="true"></module-option>
+                	</login-module>
+                </authentication>
+                </security-domain>
             </security-domains>
         </subsystem>
         <subsystem xmlns="urn:jboss:domain:transactions:3.0">

@@ -68,7 +68,7 @@ public abstract class User implements Serializable {
 		CUSTOMER, EMPLOYEE, ADMINISTRATOR
 	}
 
-	@CollectionTable(name = "lib_user_role", joinColumns = @JoinColumn(name = "user_id"), uniqueConstraints = @UniqueConstraint(columnNames = {
+	@CollectionTable(name = "user_role", joinColumns = @JoinColumn(name = "user_id"), uniqueConstraints = @UniqueConstraint(columnNames = {
 			"user_id", "role" }))
 	@ElementCollection(fetch = FetchType.EAGER)
 	@Column(name = "role")
