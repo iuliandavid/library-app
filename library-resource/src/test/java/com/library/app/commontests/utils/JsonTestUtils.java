@@ -46,4 +46,5 @@ public class JsonTestUtils {
 		final JsonObject jsonObject = JsonReader.readAsJsonObject(json);
 		return JsonReader.getLongOrNull(jsonObject, "id");
 	}
+
 }

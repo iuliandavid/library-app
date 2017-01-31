@@ -29,7 +29,7 @@ public interface UserServices {
 
 	void updatePassword(long id, String password);
 
-	User findUserByEmail(String email);
+	User findByEmail(String email);
 
-	User findUserByEmailAndPassword(String email, String password);
+	User findByEmailAndPassword(String email, String password);
 }

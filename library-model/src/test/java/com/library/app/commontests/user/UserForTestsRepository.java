@@ -30,7 +30,7 @@ public class UserForTestsRepository {
 
 	public static User johnDoe() {
 		final User user = new Customer();
-		user.setName("John Doe");
+		user.setName("John doe");
 		user.setEmail("john@domain.com");
 		user.setPassword("123456");
 		return user;

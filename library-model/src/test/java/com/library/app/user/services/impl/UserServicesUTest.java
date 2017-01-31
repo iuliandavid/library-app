@@ -200,13 +200,13 @@ public class UserServicesUTest {
 	@Test(expected = UserNotFoundException.class)
 	public void findUserByEmailNotFound() {
 		when(userRepository.findByEmail(johnDoe().getEmail())).thenReturn(null);
-		userServices.findUserByEmail(johnDoe().getEmail());
+		userServices.findByEmail(johnDoe().getEmail());
 	}
 
 	@Test
 	public void findUserByEmail() {
 		when(userRepository.findByEmail(johnDoe().getEmail())).thenReturn(userWithIdAndCreatedAt(johnDoe(), 1L));
-		final User user = userServices.findUserByEmail(johnDoe().getEmail());
+		final User user = userServices.findByEmail(johnDoe().getEmail());
 		assertThat(user, is(notNullValue()));
 		assertThat(user.getName(), is(equalTo(johnDoe().getName())));
 	}
@@ -215,7 +215,7 @@ public class UserServicesUTest {
 	public void findUserByEmailAndPasswordNotFound() {
 		when(userRepository.findById(1L)).thenReturn(null);
 		final User user = johnDoe();
-		userServices.findUserByEmailAndPassword(user.getEmail(), user.getPassword());
+		userServices.findByEmailAndPassword(user.getEmail(), user.getPassword());
 	}
 
 	@Test(expected = UserNotFoundException.class)
@@ -227,7 +227,7 @@ public class UserServicesUTest {
 		returnedUser = userWithEncryptedPassword(returnedUser);
 		when(userRepository.findByEmail(user.getEmail())).thenReturn(returnedUser);
 
-		userServices.findUserByEmailAndPassword(user.getEmail(), user.getPassword());
+		userServices.findByEmailAndPassword(user.getEmail(), user.getPassword());
 	}
 
 	@Test
@@ -238,7 +238,7 @@ public class UserServicesUTest {
 		returnedUser = userWithEncryptedPassword(returnedUser);
 		when(userRepository.findByEmail(user.getEmail())).thenReturn(returnedUser);
 
-		user = userServices.findUserByEmailAndPassword(user.getEmail(), user.getPassword());
+		user = userServices.findByEmailAndPassword(user.getEmail(), user.getPassword());
 		assertThat(user, is(notNullValue()));
 		assertThat(user.getName(), is(equalTo(johnDoe().getName())));
 	}

@@ -105,7 +105,7 @@ public class UserServicesImpl implements UserServices {
 	}
 
 	@Override
-	public User findUserByEmail(final String email) {
+	public User findByEmail(final String email) {
 		final User user = userRepository.findByEmail(email);
 		if (user == null) {
 			throw new UserNotFoundException();
@@ -115,8 +115,8 @@ public class UserServicesImpl implements UserServices {
 	}
 
 	@Override
-	public User findUserByEmailAndPassword(final String email, final String password) {
-		final User user = findUserByEmail(email);
+	public User findByEmailAndPassword(final String email, final String password) {
+		final User user = findByEmail(email);
 		if (!user.getPassword().equals(PasswordUtils.encryptPassword(password))) {
 			throw new UserNotFoundException();
 		}
