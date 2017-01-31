@@ -8,7 +8,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
- * @author Iulian David iulian.david@ropardo.ro
+ * @author Iulian David david.iulian@gmail.com
  *
  */
 public class DateUtils {

@@ -36,4 +36,10 @@ public class UserResourceDB {
 	public void addAll() {
 		allUsers().forEach(userServices::add);
 	}
+
+	@POST
+	@Path("/admin")
+	public void addAdmin() {
+		userServices.add(admin());
+	}
 }

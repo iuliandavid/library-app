@@ -12,7 +12,7 @@ import org.mockito.ArgumentMatcher;
 import com.library.app.user.model.User;
 
 /**
- * @author Iulian David iulian.david@ropardo.ro
+ * @author Iulian David david.iulian@gmail.com
  *
  */
 public class UserArgumentMatcher implements ArgumentMatcher<User> {

@@ -8,7 +8,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
 
 /**
- * @author Iulian David iulian.david@ropardo.ro
+ * @author Iulian David david.iulian@gmail.com
  *
  */
 public final class PasswordUtils {
