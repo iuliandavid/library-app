@@ -8,8 +8,8 @@ pipelines:
           
   branches:
     master:
-      - step:
-          script:
-          	- mvn --version
-          	- echo "The integration tests are run only on master branch"
-          	- mvn clean install
+    - step:
+        script:
+          - mvn --version
+          - echo "The integration tests are run only on master branch"
+          - mvn clean install
