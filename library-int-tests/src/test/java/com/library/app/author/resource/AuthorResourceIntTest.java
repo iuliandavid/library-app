@@ -137,6 +137,7 @@ public class AuthorResourceIntTest {
 	@Test
 	@RunAsClient
 	public void findByFilterAndPaginationAndOrderingDescendingByName() {
+		resourceClient.user(johnDoe());
 		resourceClient.resourcePath("DB/" + PATH_RESOURCE).postWithContent("");
 		final int expectedRows = 10;
 		// first page

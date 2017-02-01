@@ -4,7 +4,6 @@
 package com.library.app.category.resource;
 
 import static com.library.app.commontests.category.CategoryForTestsRepository.*;
-import static com.library.app.commontests.user.UserForTestsRepository.*;
 import static com.library.app.commontests.utils.FileTestNameUtils.*;
 import static com.library.app.commontests.utils.JsonTestUtils.*;
 import static org.hamcrest.CoreMatchers.*;
@@ -58,8 +57,6 @@ import com.library.app.commontests.utils.ResourceDefinitions;
 @RunWith(Arquillian.class)
 public class CategoryResourceIntTest {
 
-	private static final String DATABASE_BULK_OPERATIONS = "/DB";
-
 	/**
 	 * We don't know the url resource(aquillian creates one at runtime) that why we let Arquillian decide
 	 * The @ArquillianResource will inject the created URL
@@ -81,9 +78,9 @@ public class CategoryResourceIntTest {
 		this.resourceClient = new ResourceClient(url);
 		// Since the tests run as clients, not on server side, the database must be clear after each test
 		resourceClient.resourcePath("DB/").delete();
-		// adding the Administstrator account
+		// adding the user and customers account
 		resourceClient.resourcePath("DB/" + ResourceDefinitions.USER.getResourceName()).postWithContent("");
-		resourceClient.user(johnDoe());
+		resourceClient.user(null);
 	}
 
 	@Test

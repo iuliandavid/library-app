@@ -5,7 +5,6 @@ package com.library.app.category.resource;
 
 import java.util.List;
 
-import javax.annotation.security.PermitAll;
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -43,7 +42,6 @@ import com.library.app.common.model.StandardsOperationResults;
 @Path("/categories")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-@PermitAll
 public class CategoryResource {
 
 	private Logger logger = LoggerFactory.getLogger(CategoryResource.class);
