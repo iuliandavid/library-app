@@ -9,12 +9,13 @@ import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.EmptyAsset;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.jboss.shrinkwrap.resolver.api.maven.Maven;
+import org.junit.Ignore;
 
 /**
  * @author iulian
  *
  */
-
+@Ignore
 public class ArquillianTestUtils {
 
 	public static WebArchive createDeploymentArchive() {

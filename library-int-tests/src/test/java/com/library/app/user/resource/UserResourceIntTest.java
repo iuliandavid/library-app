@@ -4,6 +4,7 @@
 package com.library.app.user.resource;
 
 import static com.library.app.commontests.user.UserForTestsRepository.*;
+import static com.library.app.commontests.user.UserTestUtils.*;
 import static com.library.app.commontests.utils.FileTestNameUtils.*;
 import static com.library.app.commontests.utils.JsonTestUtils.*;
 import static org.hamcrest.CoreMatchers.*;
@@ -57,14 +58,12 @@ import com.library.app.user.model.User;
 @RunWith(Arquillian.class)
 public class UserResourceIntTest {
 
-	private static final String DATABASE_BULK_OPERATIONS = "/DB";
-
 	/**
-	 * We don't know the url resource(aquillian creates one at runtime) that why we let Arquillian decide
+	 * We don't know the url resource(Aquillian creates one at runtime) that why we let Arquillian decide
 	 * The @ArquillianResource will inject the created URL
 	 */
 	@ArquillianResource
-	private URL url;
+	private URL deploymentUrl;
 
 	private ResourceClient resourceClient;
 
@@ -77,103 +76,233 @@ public class UserResourceIntTest {
 
 	@Before
 	public void initTestCase() {
-		this.resourceClient = new ResourceClient(url);
-		// Since the tests run as clients, not on server side, the database must be clear after each test
-		resourceClient.resourcePath(DATABASE_BULK_OPERATIONS).delete();
+		resourceClient = new ResourceClient(deploymentUrl);
+
+		resourceClient.resourcePath("DB/").delete();
 		// adding the Administstrator account
-		resourceClient.resourcePath(DATABASE_BULK_OPERATIONS + PATH_RESOURCE + "/admin").postWithContent("");
+		resourceClient.resourcePath("DB/" + PATH_RESOURCE + "/admin").postWithContent("");
+
 	}
 
 	@Test
 	@RunAsClient
 	public void addValidCustomerAndFindIt() {
+		final Long userId = addUserAndGetId("customerJohnDoe.json");
 
-		// since the response will be a String we will read the Body (response.readEntity) as String
-		final Long id = addUserAndGetId("customerJohnDoe.json");
+		findUserAndAssertResponseWithUser(userId, johnDoe());
+	}
 
-		findUserAndAssertResponseWithUser(id, johnDoe());
+	@Test
+	@RunAsClient
+	public void addUserWithNullName() {
+		addUserWithValidationError("customerWithNullName.json", "userErrorNullName.json");
 	}
 
 	@Test
 	@RunAsClient
 	public void addExistentUser() {
-		resourceClient.resourcePath(PATH_RESOURCE)
-				.postWithFile(getPathFileRequest(PATH_RESOURCE, "customerJohnDoe.json"));
-
-		final Response response = resourceClient.resourcePath(PATH_RESOURCE).postWithFile(
-				getPathFileRequest(PATH_RESOURCE, "customerJohnDoe.json"));
-		assertThat(response.getStatus(), is(equalTo(HttpCode.VALIDATION_ERROR.getCode())));
-		assertJsonResponseWithFile(response, "userAlreadyExists.json");
+		addUserAndGetId("customerJohnDoe.json");
+		addUserWithValidationError("customerJohnDoe.json", "userAlreadyExists.json");
 	}
 
-	// @Test
-	// @RunAsClient
-	// public void updateValidCategory() {
-	// final Long id = addCategoryAndGetId("category.json");
-	// findCategoryAndAssertResponseWithCategory(id, java());
-	//
-	// final Response response = resourceClient.resourcePath(PATH_RESOURCE + "/" + id).putWithFile(
-	// getPathFileRequest(PATH_RESOURCE, "categoryCleanCode.json"));
-	// assertThat(response.getStatus(), is(equalTo(HttpCode.OK.getCode())));
-	//
-	// findCategoryAndAssertResponseWithCategory(id, cleanCode());
-	// }
-	//
-	// @Test
-	// @RunAsClient
-	// public void updateCategoryWithNameBelongingToOtherCategory() {
-	// final Long javaCategoryId = addCategoryAndGetId("category.json");
-	// addCategoryAndGetId("categoryCleanCode.json");
-	//
-	// final Response response = resourceClient.resourcePath(PATH_RESOURCE + "/" + javaCategoryId).putWithFile(
-	// getPathFileRequest(PATH_RESOURCE, "categoryCleanCode.json"));
-	// assertThat(response.getStatus(), is(equalTo(HttpCode.VALIDATION_ERROR.getCode())));
-	// assertJsonResponseWithFile(response, "categoryAlreadyExists.json");
-	// }
-	//
-	// @Test
-	// @RunAsClient
-	// public void updateCategoryNotFound() {
-	// final Response response = resourceClient.resourcePath(PATH_RESOURCE + "/999").putWithFile(
-	// getPathFileRequest(PATH_RESOURCE, "category.json"));
-	// assertThat(response.getStatus(), is(equalTo(HttpCode.NOT_FOUND.getCode())));
-	// }
-	//
-	// @Test
-	// @RunAsClient
-	// public void findCategoryNotFound() {
-	// final Response response = resourceClient.resourcePath(PATH_RESOURCE + "/999").get();
-	// assertThat(response.getStatus(), is(equalTo(HttpCode.NOT_FOUND.getCode())));
-	// }
-	//
-	// /**
-	// *
-	// */
-	// @Test
-	// @RunAsClient
-	// public void addCategoryWithNullName() {
-	// final Response response = resourceClient.resourcePath(PATH_RESOURCE)
-	// .postWithFile(getPathFileRequest(PATH_RESOURCE, "categoryWithNullName.json"));
-	//
-	// assertThat(response.getStatus(), is(equalTo(HttpCode.VALIDATION_ERROR.getCode())));
-	// assertJsonResponseWithFile(response, "categoryErrorNullName.json");
-	// }
+	@Test
+	@RunAsClient
+	public void updateValidCustomerAsAdmin() {
+		final Long userId = addUserAndGetId("customerJohnDoe.json");
+		findUserAndAssertResponseWithUser(userId, johnDoe());
 
-	private void assertJsonResponseWithFile(final Response response, final String fileName) {
-		// !!!!!Since the response is set to Unknown(wildfly 8) or Unreadable Entity(wildfly 10) we must USE
-		// response.readEntity(String.class)
-		assertJsonMatchesFileContent(response.readEntity(String.class), getPathFileResponse(PATH_RESOURCE, fileName));
+		final Response response = resourceClient.resourcePath(PATH_RESOURCE + "/" + userId).putWithFile(
+				getPathFileRequest(PATH_RESOURCE, "updateCustomerJohnDoeWithNewName.json"));
+		assertThat(response.getStatus(), is(equalTo(HttpCode.OK.getCode())));
+
+		final User expectedUser = johnDoe();
+		expectedUser.setName("New name");
+		findUserAndAssertResponseWithUser(userId, expectedUser);
+	}
+
+	@Test
+	@RunAsClient
+	public void updateValidLoggedCustomerAsCustomer() {
+		final Long userId = addUserAndGetId("customerJohnDoe.json");
+		findUserAndAssertResponseWithUser(userId, johnDoe());
+
+		final Response response = resourceClient.user(johnDoe()).resourcePath(PATH_RESOURCE + "/" + userId)
+				.putWithFile(
+						getPathFileRequest(PATH_RESOURCE, "updateCustomerJohnDoeWithNewName.json"));
+		assertThat(response.getStatus(), is(equalTo(HttpCode.OK.getCode())));
+
+		resourceClient.user(admin());
+		final User expectedUser = johnDoe();
+		expectedUser.setName("New name");
+		findUserAndAssertResponseWithUser(userId, expectedUser);
+	}
+
+	@Test
+	@RunAsClient
+	public void updateCustomerButNotTheLoggedCustomer() {
+		final Long userId = addUserAndGetId("customerJohnDoe.json");
+		findUserAndAssertResponseWithUser(userId, johnDoe());
+		addUserAndGetId("customerMary.json");
+
+		final Response response = resourceClient.user(mary()).resourcePath(PATH_RESOURCE + "/" + userId).putWithFile(
+				getPathFileRequest(PATH_RESOURCE, "updateCustomerJohnDoeWithNewName.json"));
+		assertThat(response.getStatus(), is(equalTo(HttpCode.FORBIDDEN.getCode())));
+	}
+
+	@Test
+	@RunAsClient
+	public void updateValidCustomerTryingToChangeType() {
+		final Long userId = addUserAndGetId("customerJohnDoe.json");
+		findUserAndAssertResponseWithUser(userId, johnDoe());
+
+		final Response response = resourceClient.resourcePath(PATH_RESOURCE + "/" + userId).putWithFile(
+				getPathFileRequest(PATH_RESOURCE, "updateCustomerJohnDoeWithNewType.json"));
+		assertThat(response.getStatus(), is(equalTo(HttpCode.INTERNAL_ERROR.getCode())));
+	}
+
+	@Test
+	@RunAsClient
+	public void updateValidCustomerTryingToChangePassword() {
+		final Long userId = addUserAndGetId("customerJohnDoe.json");
+		findUserAndAssertResponseWithUser(userId, johnDoe());
+
+		assertThat(authenticate(johnDoe().getEmail(), johnDoe().getPassword()), is(equalTo(true)));
+		assertThat(authenticate(johnDoe().getEmail(), "111111"), is(equalTo(false)));
+
+		final Response response = resourceClient.user(johnDoe()).resourcePath(PATH_RESOURCE + "/" + userId)
+				.putWithFile(
+						getPathFileRequest(PATH_RESOURCE, "updateCustomerJohnDoeWithNewPassword.json"));
+		assertThat(response.getStatus(), is(equalTo(HttpCode.OK.getCode())));
+
+		assertThat(authenticate(johnDoe().getEmail(), johnDoe().getPassword()), is(equalTo(true)));
+		assertThat(authenticate(johnDoe().getEmail(), "111111"), is(equalTo(false)));
+	}
+
+	@Test
+	@RunAsClient
+	public void updateUserWithEmailBelongingToOtherUser() {
+		final Long userId = addUserAndGetId("customerJohnDoe.json");
+		addUserAndGetId("customerMary.json");
+
+		final Response responseUpdate = resourceClient.user(admin()).resourcePath(PATH_RESOURCE + "/" + userId)
+				.putWithFile(
+						getPathFileRequest(PATH_RESOURCE, "customerMary.json"));
+		assertThat(responseUpdate.getStatus(), is(equalTo(HttpCode.VALIDATION_ERROR.getCode())));
+		assertJsonResponseWithFile(responseUpdate, "userAlreadyExists.json");
+	}
+
+	@Test
+	@RunAsClient
+	public void updateUserNotFound() {
+		final Response response = resourceClient.user(admin()).resourcePath(PATH_RESOURCE + "/" + 999).putWithFile(
+				getPathFileRequest(PATH_RESOURCE, "customerJohnDoe.json"));
+		assertThat(response.getStatus(), is(equalTo(HttpCode.NOT_FOUND.getCode())));
+	}
+
+	@Test
+	@RunAsClient
+	public void updatePasswordAsAdmin() {
+		final Long userId = addUserAndGetId("customerJohnDoe.json");
+
+		assertThat(authenticate(johnDoe().getEmail(), johnDoe().getPassword()), is(equalTo(true)));
+		assertThat(authenticate(johnDoe().getEmail(), "111111"), is(equalTo(false)));
+
+		final Response response = resourceClient.user(admin()).resourcePath(PATH_RESOURCE + "/" + userId + "/password")
+				.putWithContent(getJsonWithPassword("111111"));
+		assertThat(response.getStatus(), is(equalTo(HttpCode.OK.getCode())));
+
+		assertThat(authenticate(johnDoe().getEmail(), johnDoe().getPassword()), is(equalTo(false)));
+		assertThat(authenticate(johnDoe().getEmail(), "111111"), is(equalTo(true)));
+	}
+
+	@Test
+	@RunAsClient
+	public void updatePasswordLoggedCustomerAsCustomer() {
+		final Long userId = addUserAndGetId("customerJohnDoe.json");
+
+		assertThat(authenticate(johnDoe().getEmail(), johnDoe().getPassword()), is(equalTo(true)));
+		assertThat(authenticate(johnDoe().getEmail(), "111111"), is(equalTo(false)));
+
+		final Response response = resourceClient.user(johnDoe())
+				.resourcePath(PATH_RESOURCE + "/" + userId + "/password")
+				.putWithContent(getJsonWithPassword("111111"));
+		assertThat(response.getStatus(), is(equalTo(HttpCode.OK.getCode())));
+
+		assertThat(authenticate(johnDoe().getEmail(), johnDoe().getPassword()), is(equalTo(false)));
+		assertThat(authenticate(johnDoe().getEmail(), "111111"), is(equalTo(true)));
+	}
+
+	@Test
+	@RunAsClient
+	public void updatePasswordButNotTheLoggedCustomer() {
+		final Long userId = addUserAndGetId("customerJohnDoe.json");
+		addUserAndGetId("customerMary.json");
+
+		final Response response = resourceClient.user(mary()).resourcePath(PATH_RESOURCE + "/" + userId + "/password")
+				.putWithContent(getJsonWithPassword("111111"));
+		assertThat(response.getStatus(), is(equalTo(HttpCode.FORBIDDEN.getCode())));
+	}
+
+	@Test
+	@RunAsClient
+	public void findUserByIdNotFound() {
+		final Response response = resourceClient.user(admin()).resourcePath(PATH_RESOURCE + "/" + 999).get();
+		assertThat(response.getStatus(), is(equalTo(HttpCode.NOT_FOUND.getCode())));
+	}
+
+	@Test
+	@RunAsClient
+	public void findByFilterPaginatingAndOrderingDescendingByName() {
+		resourceClient.resourcePath("DB/").delete();
+		resourceClient.resourcePath("DB/" + PATH_RESOURCE).postWithContent("");
+		resourceClient.user(admin());
+
+		// first page
+		Response response = resourceClient.resourcePath(PATH_RESOURCE + "?page=0&per_page=2&sort=-name").get();
+		assertThat(response.getStatus(), is(equalTo(HttpCode.OK.getCode())));
+		assertResponseContainsTheUsers(response, 3, mary(), johnDoe());
+
+		// second page
+		response = resourceClient.resourcePath(PATH_RESOURCE + "?page=1&per_page=2&sort=-name").get();
+		assertThat(response.getStatus(), is(equalTo(HttpCode.OK.getCode())));
+		assertResponseContainsTheUsers(response, 3, admin());
+	}
+
+	private void addUserWithValidationError(final String requestFileName, final String responseFileName) {
+		final Response response = resourceClient.user(null).resourcePath(PATH_RESOURCE)
+				.postWithFile(getPathFileRequest(PATH_RESOURCE, requestFileName));
+		assertThat(response.getStatus(), is(equalTo(HttpCode.VALIDATION_ERROR.getCode())));
+		assertJsonResponseWithFile(response, responseFileName);
+	}
+
+	private void assertResponseContainsTheUsers(final Response response, final int expectedTotalRecords,
+			final User... expectedUsers) {
+
+		final JsonArray usersList = IntegrationTestUtils.assertJsonHasTheNumberOfElementsAndReturnTheEntries(response,
+				expectedTotalRecords, expectedUsers.length);
+
+		for (int i = 0; i < expectedUsers.length; i++) {
+			final User expectedUser = expectedUsers[i];
+			assertThat(usersList.get(i).getAsJsonObject().get("name").getAsString(),
+					is(equalTo(expectedUser.getName())));
+		}
+	}
+
+	private boolean authenticate(final String email, final String password) {
+		final Response response = resourceClient.user(null).resourcePath(PATH_RESOURCE + "/authenticate")
+				.postWithContent(getJsonWithEmailAndPassword(email, password));
+		return response.getStatus() == HttpCode.OK.getCode();
 	}
 
 	private Long addUserAndGetId(final String fileName) {
+		resourceClient.user(null);
 		return IntegrationTestUtils.addElementWithFileAndGetId(resourceClient, PATH_RESOURCE, PATH_RESOURCE, fileName);
 	}
 
-	private void findUserAndAssertResponseWithUser(final Long userIdToBeFound,
-			final User expectedUser) {
-		final String json = IntegrationTestUtils.findById(resourceClient, PATH_RESOURCE, userIdToBeFound);
-
-		assertResponseWithUser(json, expectedUser);
+	private void findUserAndAssertResponseWithUser(final Long userIdToBeFound, final User expectedUser) {
+		resourceClient.user(admin());
+		final String bodyResponse = IntegrationTestUtils.findById(resourceClient, PATH_RESOURCE, userIdToBeFound);
+		assertResponseWithUser(bodyResponse, expectedUser);
 	}
 
 	/**
@@ -182,11 +311,12 @@ public class UserResourceIntTest {
 	 */
 	private void assertResponseWithUser(final String bodyResponse, final User expectedUser) {
 		final JsonObject userJson = JsonReader.readAsJsonObject(bodyResponse);
-		assertThat(JsonReader.getStringOrNull(userJson, "id"), is(equalTo(expectedUser.getId())));
-		assertThat(JsonReader.getStringOrNull(userJson, "name"), is(equalTo(expectedUser.getName())));
-		assertThat(JsonReader.getStringOrNull(userJson, "email"), is(equalTo(expectedUser.getEmail())));
-		assertThat(JsonReader.getStringOrNull(userJson, "type"), is(equalTo(expectedUser.getUserType().toString())));
-		assertThat(JsonReader.getStringOrNull(userJson, "createdAt"), is(notNullValue()));
+		assertThat(userJson.get("id").getAsLong(), is(notNullValue()));
+		assertThat(userJson.get("name").getAsString(), is(equalTo(expectedUser.getName())));
+		assertThat(userJson.get("email").getAsString(), is(equalTo(expectedUser.getEmail())));
+		assertThat(userJson.get("type").getAsString(), is(equalTo(expectedUser.getUserType().toString())));
+		assertThat(userJson.get("createdAt").getAsString(), is(notNullValue()));
+
 		final JsonArray roles = userJson.getAsJsonArray("roles");
 		assertThat(roles.size(), is(equalTo(expectedUser.getRoles().size())));
 		for (int i = 0; i < roles.size(); i++) {
@@ -196,15 +326,7 @@ public class UserResourceIntTest {
 		}
 	}
 
-	private void assertResponseContainsTheUsers(final Response response, final int expectedTotalRecords,
-			final User... expectedUsers) {
-		final JsonArray categoryList = IntegrationTestUtils.assertJsonHasTheNumberOfElementsAndReturnTheEntries(
-				response,
-				expectedTotalRecords, expectedUsers.length);
-		for (int i = 0; i < expectedUsers.length; i++) {
-			final User expectedUser = expectedUsers[i];
-			assertThat(categoryList.get(i).getAsJsonObject().get("name").getAsString(),
-					is(equalTo(expectedUser.getName())));
-		}
+	private void assertJsonResponseWithFile(final Response response, final String fileName) {
+		assertJsonMatchesFileContent(response.readEntity(String.class), getPathFileResponse(PATH_RESOURCE, fileName));
 	}
 }

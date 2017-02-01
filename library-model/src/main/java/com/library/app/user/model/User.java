@@ -51,11 +51,11 @@ public abstract class User implements Serializable {
 	@Column(name = "created_at", updatable = false)
 	private Date createdAt;
 
-	@NotNull(message = "Name cannot be null")
+	@NotNull(message = "User Name cannot be null")
 	@Size(min = 3, max = 40)
 	private String name;
 
-	@Email(message = "email cannot be null")
+	@Email(message = "User Email cannot be null")
 	@NotNull
 	@Column(unique = true)
 	@Size(max = 70)

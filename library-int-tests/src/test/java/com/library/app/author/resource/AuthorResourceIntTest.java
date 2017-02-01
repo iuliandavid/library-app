@@ -87,16 +87,16 @@ public class AuthorResourceIntTest {
 
 	@Test
 	@RunAsClient
-	public void addvalidAuthorAndFindIt() {
+	public void addValidAuthorAndFindIt() {
 		final Long authorId = addAuthorAndGetId("robertMartin.json");
 		findAuthorAndAssertResponseWithAuthor(authorId, robertMartin());
 	}
 
 	@Test
 	@RunAsClient
-	public void addAuthroWithNullName() {
-		final Response response = resourceClient.resourcePath(PATH_RESOURCE)
-				.postWithFile(getPathFileRequest(PATH_RESOURCE, "authorWithNullName.json"));
+	public void addAuthorWithNullName() {
+		final Response response = resourceClient.resourcePath(PATH_RESOURCE).postWithFile(
+				getPathFileRequest(PATH_RESOURCE, "authorWithNullName.json"));
 
 		assertThat(response.getStatus(), is(equalTo(HttpCode.VALIDATION_ERROR.getCode())));
 		assertJsonResponseWithFile(response, "authorErrorNullName.json");

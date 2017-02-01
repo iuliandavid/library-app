@@ -10,7 +10,9 @@ import javax.inject.Inject;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.UriInfo;
 
 import com.library.app.user.services.UserServices;
 
@@ -31,6 +33,9 @@ public class UserResourceDB {
 
 	@Inject
 	private UserServices userServices;
+
+	@Context
+	UriInfo uriInfo;
 
 	@POST
 	public void addAll() {

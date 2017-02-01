@@ -6,6 +6,7 @@ package com.library.app.commontests.db;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
@@ -15,6 +16,7 @@ import com.library.app.author.model.Author;
 import com.library.app.category.model.Category;
 import com.library.app.user.model.User;
 
+@Stateless
 @Ignore
 public class TestBulkDBOperationsEJB {
 
