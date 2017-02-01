@@ -40,7 +40,6 @@
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-validator</artifactId>
 			<version>5.2.1.Final</version>
-			<scope>test</scope>
 		</dependency>
 	</dependencies>
 </project>
