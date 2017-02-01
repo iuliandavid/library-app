@@ -4,6 +4,7 @@
 package com.library.app.author.resource;
 
 import static com.library.app.commontests.author.AuthorForTestsRepository.*;
+import static com.library.app.commontests.user.UserForTestsRepository.*;
 import static com.library.app.commontests.utils.FileTestNameUtils.*;
 import static com.library.app.commontests.utils.JsonTestUtils.*;
 import static org.hamcrest.CoreMatchers.*;
@@ -59,8 +60,6 @@ import com.library.app.commontests.utils.ResourceDefinitions;
 @RunWith(Arquillian.class)
 public class AuthorResourceIntTest {
 
-	private static final String DATABASE_BULK_OPERATIONS = "/DB";
-
 	private final Logger logger = LoggerFactory.getLogger(AuthorResourceIntTest.class);
 	/**
 	 * We don't know the url resource(aquillian creates one at runtime) that why we let Arquillian decide
@@ -82,7 +81,10 @@ public class AuthorResourceIntTest {
 	public void initTestCase() {
 		this.resourceClient = new ResourceClient(url);
 		// Since the tests run as clients, not on server side, the database must be clear after each test
-		resourceClient.resourcePath(DATABASE_BULK_OPERATIONS).delete();
+		resourceClient.resourcePath("DB/").delete();
+		// adding the Administstrator account
+		resourceClient.resourcePath("DB/" + ResourceDefinitions.USER.getResourceName()).postWithContent("");
+		resourceClient.user(admin());
 	}
 
 	@Test

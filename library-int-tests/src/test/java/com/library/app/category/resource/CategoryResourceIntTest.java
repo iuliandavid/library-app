@@ -4,6 +4,7 @@
 package com.library.app.category.resource;
 
 import static com.library.app.commontests.category.CategoryForTestsRepository.*;
+import static com.library.app.commontests.user.UserForTestsRepository.*;
 import static com.library.app.commontests.utils.FileTestNameUtils.*;
 import static com.library.app.commontests.utils.JsonTestUtils.*;
 import static org.hamcrest.CoreMatchers.*;
@@ -79,7 +80,10 @@ public class CategoryResourceIntTest {
 	public void initTestCase() {
 		this.resourceClient = new ResourceClient(url);
 		// Since the tests run as clients, not on server side, the database must be clear after each test
-		resourceClient.resourcePath(DATABASE_BULK_OPERATIONS).delete();
+		resourceClient.resourcePath("DB/").delete();
+		// adding the Administstrator account
+		resourceClient.resourcePath("DB/" + ResourceDefinitions.USER.getResourceName()).postWithContent("");
+		resourceClient.user(johnDoe());
 	}
 
 	@Test
