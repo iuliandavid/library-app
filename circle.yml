@@ -10,3 +10,5 @@ test:
 deployment:
   master:
     branch: master
+    heroku:
+      appname: library-app
