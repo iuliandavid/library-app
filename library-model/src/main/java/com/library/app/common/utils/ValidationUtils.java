@@ -1,7 +1,7 @@
 /**
  * 
  */
-package com.library.app.common;
+package com.library.app.common.utils;
 
 import java.util.Iterator;
 import java.util.Set;

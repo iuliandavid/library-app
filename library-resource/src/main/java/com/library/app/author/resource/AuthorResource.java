@@ -3,6 +3,8 @@
  */
 package com.library.app.author.resource;
 
+import javax.annotation.security.PermitAll;
+import javax.annotation.security.RolesAllowed;
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -42,8 +44,10 @@ import com.library.app.common.model.StandardsOperationResults;
 @Path("/authors")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
+@RolesAllowed({ "EMPLOYEE" })
 public class AuthorResource {
 
+	private Logger logger = LoggerFactory.getLogger(AuthorResource.class);
 	private static final ResourceMessage RESOURCE_MESSAGE = new ResourceMessage("author");
 
 	@Inject
@@ -54,8 +58,6 @@ public class AuthorResource {
 
 	@Context
 	UriInfo uriInfo;
-
-	private Logger logger = LoggerFactory.getLogger(AuthorResource.class);
 
 	/**
 	 * The endpoint that will be used for creating a new Author
@@ -141,6 +143,7 @@ public class AuthorResource {
 	 * @return
 	 */
 	@GET
+	@PermitAll
 	public Response findByFilter() {
 		ResponseBuilder responseBuilder;
 

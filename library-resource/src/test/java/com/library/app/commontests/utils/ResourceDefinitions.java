@@ -11,7 +11,7 @@ import org.junit.Ignore;
  */
 @Ignore
 public enum ResourceDefinitions {
-	CATEGORY("categories"), AUTHOR("authors");
+	CATEGORY("categories"), AUTHOR("authors"), USER("users");
 
 	private String resourceName;
 

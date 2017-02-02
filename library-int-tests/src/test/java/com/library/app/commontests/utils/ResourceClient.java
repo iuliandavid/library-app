@@ -12,6 +12,8 @@ import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import com.library.app.user.model.User;
+
 /**
  * The consumer used in our tests
  * 
@@ -23,6 +25,8 @@ public class ResourceClient {
 	private URL urlBase;
 
 	private String resourcePath;
+
+	private User user;
 
 	/**
 	 * Default Constructor
@@ -39,6 +43,12 @@ public class ResourceClient {
 	public ResourceClient resourcePath(final String resourcePath) {
 		this.resourcePath = resourcePath;
 		return this;
+	}
+
+	public ResourceClient user(final User user) {
+		this.user = user;
+		return this;
+
 	}
 
 	public Response postWithFile(final String fileName) {
@@ -64,12 +74,19 @@ public class ResourceClient {
 		return buildClient().put(Entity.entity(content, MediaType.APPLICATION_JSON));
 	}
 
+	public void delete() {
+		buildClient().delete();
+	}
+
 	public Response get() {
 		return buildClient().get();
 	}
 
 	private Builder buildClient() {
-		final Client resourceClient = ClientBuilder.newClient();
+		Client resourceClient = ClientBuilder.newClient();
+		if (user != null) {
+			resourceClient = resourceClient.register(new HttpBasicAuthenticator(user.getEmail(), user.getPassword()));
+		}
 		return resourceClient.target(getFullURL(resourcePath)).request();
 	}
 
@@ -79,10 +96,6 @@ public class ResourceClient {
 		} catch (final URISyntaxException e) {
 			throw new IllegalArgumentException(e);
 		}
-	}
-
-	public void delete() {
-		buildClient().delete();
 	}
 
 }

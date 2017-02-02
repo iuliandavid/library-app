@@ -3,5 +3,13 @@ pipelines:
   default:
     - step:
         script: 
+          - echo "The integration tests are run only on master branch"
+          - mvn clean install -Pskip-int-tests 
+          
+  branches:
+    master:
+    - step:
+        script:
           - mvn --version
+          - echo "The integration tests are run only on master branch"
           - mvn clean install

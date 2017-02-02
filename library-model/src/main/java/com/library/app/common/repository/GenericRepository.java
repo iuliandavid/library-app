@@ -4,6 +4,7 @@
 package com.library.app.common.repository;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import javax.persistence.Entity;
@@ -11,6 +12,8 @@ import javax.persistence.EntityManager;
 import javax.persistence.Query;
 
 import com.library.app.category.model.Category;
+import com.library.app.common.model.PaginatedData;
+import com.library.app.common.model.filter.PaginationData;
 
 /**
  * Generic class for operations spefici to repositories
@@ -93,9 +96,16 @@ public abstract class GenericRepository<T> {
 	}
 
 	/**
-	 * Verifies if the @Category exists in the Database based on the fact that <code>name</code> is <b>unique</b>
+	 * Verifies if the {@link Entity} exists in the Database based on the fact that <code>name</code> is <b>unique</b>
+	 * A special case for verifying is when the id is given the search is made also against Id
+	 * 
+	 * <pre>
+	 * Entity entity = genericEntity.add(new Entity())
+	 * alreadyExists(entity) == false
+	 * </pre>
 	 * 
 	 * @see {@link Category}
+	 * 
 	 * @param category
 	 * @return true if found , false otherwise
 	 */
@@ -114,5 +124,62 @@ public abstract class GenericRepository<T> {
 		}
 
 		return query.setMaxResults(1).getResultList().size() > 0;
+	}
+
+	@SuppressWarnings("unchecked")
+	protected PaginatedData<T> findByParameters(final String clause, final PaginationData paginationData,
+			final Map<String, Object> queryParameters, final String defaultSortFieldWithDirection) {
+
+		final String clauseSort = "ORDER BY e." + getSortField(paginationData, defaultSortFieldWithDirection);
+		final Query queryEntities = getEntityManager()
+				.createQuery("SELECT e FROM " + getPersistentClass().getSimpleName()
+						+ " e " + clause + " " + clauseSort);
+		applyQueryParametersOnQuery(queryParameters, queryEntities);
+
+		applyPaginationOnQuery(paginationData, queryEntities);
+
+		final List<T> entities = queryEntities.getResultList();
+
+		final Integer count = countWithFilter(clause, queryParameters);
+
+		return new PaginatedData<T>(count, entities);
+	}
+
+	private Integer countWithFilter(final String clause, final Map<String, Object> queryParameters) {
+		final Query queryCount = getEntityManager()
+				.createQuery("SELECT Count(e) FROM " + getPersistentClass().getSimpleName()
+						+ " e " + clause);
+		applyQueryParametersOnQuery(queryParameters, queryCount);
+
+		return ((Long) queryCount.getSingleResult()).intValue();
+	}
+
+	private void applyPaginationOnQuery(final PaginationData paginationData, final Query query) {
+		if (paginationData != null) {
+			query.setFirstResult(paginationData.getFirstResult());
+			query.setMaxResults(paginationData.getMaxResults());
+		}
+
+	}
+
+	private String getSortField(final PaginationData paginationData, final String defaultSortField) {
+		if (paginationData == null || paginationData.getOrderField() == null) {
+			return defaultSortField;
+		}
+		return paginationData.getOrderField() + getSortDirection(paginationData);
+	}
+
+	private String getSortDirection(final PaginationData paginationData) {
+		return paginationData.isAscending() ? " ASC" : " DESC";
+	}
+
+	/**
+	 * @param queryParameters
+	 * @param query
+	 */
+	private void applyQueryParametersOnQuery(final Map<String, Object> queryParameters, final Query query) {
+		queryParameters.forEach((key, value) -> {
+			query.setParameter(key, value);
+		});
 	}
 }

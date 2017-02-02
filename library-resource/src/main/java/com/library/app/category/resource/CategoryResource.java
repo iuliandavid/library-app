@@ -5,6 +5,8 @@ package com.library.app.category.resource;
 
 import java.util.List;
 
+import javax.annotation.security.PermitAll;
+import javax.annotation.security.RolesAllowed;
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -22,8 +24,8 @@ import org.slf4j.LoggerFactory;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.library.app.category.CategoryExistentException;
-import com.library.app.category.CategoryNotFoundException;
+import com.library.app.category.exception.CategoryExistentException;
+import com.library.app.category.exception.CategoryNotFoundException;
 import com.library.app.category.model.Category;
 import com.library.app.category.repository.CategoryRepository;
 import com.library.app.category.services.CategoryServices;
@@ -42,7 +44,10 @@ import com.library.app.common.model.StandardsOperationResults;
 @Path("/categories")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
+@RolesAllowed({ "EMPLOYEE" })
 public class CategoryResource {
+
+	private Logger logger = LoggerFactory.getLogger(CategoryResource.class);
 
 	private static final ResourceMessage RESOURCE_MESSAGE = new ResourceMessage("category");
 
@@ -51,8 +56,6 @@ public class CategoryResource {
 
 	@Inject
 	CategoryJsonConverter categoryJsonConverter;
-
-	private Logger logger = LoggerFactory.getLogger(CategoryResource.class);
 
 	/**
 	 * The endpoint that will be used for creating a new Category
@@ -144,6 +147,7 @@ public class CategoryResource {
 	}
 
 	@GET
+	@PermitAll
 	public Response findAll() {
 		ResponseBuilder responseBuilder;
 		final List<Category> categories = categoryServices.findAll();

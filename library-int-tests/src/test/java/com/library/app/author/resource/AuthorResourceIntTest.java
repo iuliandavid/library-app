@@ -4,6 +4,7 @@
 package com.library.app.author.resource;
 
 import static com.library.app.commontests.author.AuthorForTestsRepository.*;
+import static com.library.app.commontests.user.UserForTestsRepository.*;
 import static com.library.app.commontests.utils.FileTestNameUtils.*;
 import static com.library.app.commontests.utils.JsonTestUtils.*;
 import static org.hamcrest.CoreMatchers.*;
@@ -59,8 +60,6 @@ import com.library.app.commontests.utils.ResourceDefinitions;
 @RunWith(Arquillian.class)
 public class AuthorResourceIntTest {
 
-	private static final String DATABASE_BULK_OPERATIONS = "/DB";
-
 	private final Logger logger = LoggerFactory.getLogger(AuthorResourceIntTest.class);
 	/**
 	 * We don't know the url resource(aquillian creates one at runtime) that why we let Arquillian decide
@@ -82,21 +81,24 @@ public class AuthorResourceIntTest {
 	public void initTestCase() {
 		this.resourceClient = new ResourceClient(url);
 		// Since the tests run as clients, not on server side, the database must be clear after each test
-		resourceClient.resourcePath(DATABASE_BULK_OPERATIONS).delete();
+		resourceClient.resourcePath("DB/").delete();
+		// adding all the users accounts to the database
+		resourceClient.resourcePath("DB/" + ResourceDefinitions.USER.getResourceName()).postWithContent("");
+		resourceClient.user(admin());
 	}
 
 	@Test
 	@RunAsClient
-	public void addvalidAuthorAndFindIt() {
+	public void addValidAuthorAndFindIt() {
 		final Long authorId = addAuthorAndGetId("robertMartin.json");
 		findAuthorAndAssertResponseWithAuthor(authorId, robertMartin());
 	}
 
 	@Test
 	@RunAsClient
-	public void addAuthroWithNullName() {
-		final Response response = resourceClient.resourcePath(PATH_RESOURCE)
-				.postWithFile(getPathFileRequest(PATH_RESOURCE, "authorWithNullName.json"));
+	public void addAuthorWithNullName() {
+		final Response response = resourceClient.resourcePath(PATH_RESOURCE).postWithFile(
+				getPathFileRequest(PATH_RESOURCE, "authorWithNullName.json"));
 
 		assertThat(response.getStatus(), is(equalTo(HttpCode.VALIDATION_ERROR.getCode())));
 		assertJsonResponseWithFile(response, "authorErrorNullName.json");
@@ -150,6 +152,27 @@ public class AuthorResourceIntTest {
 				.resourcePath(PATH_RESOURCE + "?page=1&per_page=" + expectedRows + "&sort=-name").get();
 		assertThat(response.getStatus(), is(equalTo(HttpCode.OK.getCode())));
 		assertResponseContainsTheAuthors(response, 12, erichGamma(), donRoberts());
+	}
+
+	@Test
+	@RunAsClient
+	public void findByFilterWithNoUser() {
+		final Response response = resourceClient.user(null).resourcePath(PATH_RESOURCE).get();
+		assertThat(response.getStatus(), is(equalTo(HttpCode.UNAUTHORIZED.getCode())));
+	}
+
+	@Test
+	@RunAsClient
+	public void findByFilterWithUserCustomer() {
+		final Response response = resourceClient.user(johnDoe()).resourcePath(PATH_RESOURCE).get();
+		assertThat(response.getStatus(), is(equalTo(HttpCode.OK.getCode())));
+	}
+
+	@Test
+	@RunAsClient
+	public void findByIdWithUserCustomer() {
+		final Response response = resourceClient.user(johnDoe()).resourcePath(PATH_RESOURCE + "/999").get();
+		assertThat(response.getStatus(), is(equalTo(HttpCode.FORBIDDEN.getCode())));
 	}
 
 	private void assertJsonResponseWithFile(final Response response, final String fileName) {
