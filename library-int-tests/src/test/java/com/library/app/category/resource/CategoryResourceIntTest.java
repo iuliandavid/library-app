@@ -4,6 +4,7 @@
 package com.library.app.category.resource;
 
 import static com.library.app.commontests.category.CategoryForTestsRepository.*;
+import static com.library.app.commontests.user.UserForTestsRepository.*;
 import static com.library.app.commontests.utils.FileTestNameUtils.*;
 import static com.library.app.commontests.utils.JsonTestUtils.*;
 import static org.hamcrest.CoreMatchers.*;
@@ -78,9 +79,9 @@ public class CategoryResourceIntTest {
 		this.resourceClient = new ResourceClient(url);
 		// Since the tests run as clients, not on server side, the database must be clear after each test
 		resourceClient.resourcePath("DB/").delete();
-		// adding the user and customers account
+		// adding all the users accounts to the database
 		resourceClient.resourcePath("DB/" + ResourceDefinitions.USER.getResourceName()).postWithContent("");
-		resourceClient.user(null);
+		resourceClient.user(admin());
 	}
 
 	@Test
@@ -184,6 +185,27 @@ public class CategoryResourceIntTest {
 
 		final JsonObject categoryAsJson = JsonReader.readAsJsonObject(json);
 		assertThat(JsonReader.getStringOrNull(categoryAsJson, "name"), is(equalTo(expectedCategory.getName())));
+	}
+
+	@Test
+	@RunAsClient
+	public void findByFilterWithNoUser() {
+		final Response response = resourceClient.user(null).resourcePath(PATH_RESOURCE).get();
+		assertThat(response.getStatus(), is(equalTo(HttpCode.UNAUTHORIZED.getCode())));
+	}
+
+	@Test
+	@RunAsClient
+	public void findByFilterWithUserCustomer() {
+		final Response response = resourceClient.user(johnDoe()).resourcePath(PATH_RESOURCE).get();
+		assertThat(response.getStatus(), is(equalTo(HttpCode.OK.getCode())));
+	}
+
+	@Test
+	@RunAsClient
+	public void findByIdWithUserCustomer() {
+		final Response response = resourceClient.user(johnDoe()).resourcePath(PATH_RESOURCE + "/999").get();
+		assertThat(response.getStatus(), is(equalTo(HttpCode.FORBIDDEN.getCode())));
 	}
 
 	private void assertResponseContainsTheCategories(final Response response, final int expectedTotalRecords,

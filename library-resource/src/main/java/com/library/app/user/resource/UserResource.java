@@ -249,7 +249,7 @@ public class UserResource {
 			if (loggerUser.getId().equals(id)) {
 				return true;
 			}
-		} catch (final UserNotFoundException e) {
+		} catch (final UserNotFoundException | NullPointerException e) {
 		}
 		return false;
 	}

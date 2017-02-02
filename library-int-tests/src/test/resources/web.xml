@@ -25,16 +25,6 @@
 	</security-constraint>
 	
 	<security-constraint>
-		<display-name>Api New User</display-name>
-		<web-resource-collection>
-			<web-resource-name>API New User</web-resource-name>
-			<url-pattern>/api/categories/*</url-pattern>
-			<http-method>POST</http-method>
-		</web-resource-collection>
-	</security-constraint>
-
-
-	<security-constraint>
 		<display-name>Api Test Area</display-name>
 		<web-resource-collection>
 			<web-resource-name>Api Test Area</web-resource-name>

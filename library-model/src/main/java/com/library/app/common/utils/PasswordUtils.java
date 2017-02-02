@@ -34,4 +34,8 @@ public final class PasswordUtils {
 		return Base64.getMimeEncoder().encodeToString(md.digest());
 	}
 
+	/// SHOULD be used only to generate an admin password
+	public static void main(final String... args) {
+		System.out.println(encryptPassword("dn_3=_c%yWtBb8uP"));
+	}
 }

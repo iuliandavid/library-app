@@ -82,7 +82,7 @@ public class AuthorResourceIntTest {
 		this.resourceClient = new ResourceClient(url);
 		// Since the tests run as clients, not on server side, the database must be clear after each test
 		resourceClient.resourcePath("DB/").delete();
-		// adding the Administstrator account
+		// adding all the users accounts to the database
 		resourceClient.resourcePath("DB/" + ResourceDefinitions.USER.getResourceName()).postWithContent("");
 		resourceClient.user(admin());
 	}
@@ -137,7 +137,6 @@ public class AuthorResourceIntTest {
 	@Test
 	@RunAsClient
 	public void findByFilterAndPaginationAndOrderingDescendingByName() {
-		resourceClient.user(johnDoe());
 		resourceClient.resourcePath("DB/" + PATH_RESOURCE).postWithContent("");
 		final int expectedRows = 10;
 		// first page
@@ -153,6 +152,27 @@ public class AuthorResourceIntTest {
 				.resourcePath(PATH_RESOURCE + "?page=1&per_page=" + expectedRows + "&sort=-name").get();
 		assertThat(response.getStatus(), is(equalTo(HttpCode.OK.getCode())));
 		assertResponseContainsTheAuthors(response, 12, erichGamma(), donRoberts());
+	}
+
+	@Test
+	@RunAsClient
+	public void findByFilterWithNoUser() {
+		final Response response = resourceClient.user(null).resourcePath(PATH_RESOURCE).get();
+		assertThat(response.getStatus(), is(equalTo(HttpCode.UNAUTHORIZED.getCode())));
+	}
+
+	@Test
+	@RunAsClient
+	public void findByFilterWithUserCustomer() {
+		final Response response = resourceClient.user(johnDoe()).resourcePath(PATH_RESOURCE).get();
+		assertThat(response.getStatus(), is(equalTo(HttpCode.OK.getCode())));
+	}
+
+	@Test
+	@RunAsClient
+	public void findByIdWithUserCustomer() {
+		final Response response = resourceClient.user(johnDoe()).resourcePath(PATH_RESOURCE + "/999").get();
+		assertThat(response.getStatus(), is(equalTo(HttpCode.FORBIDDEN.getCode())));
 	}
 
 	private void assertJsonResponseWithFile(final Response response, final String fileName) {
