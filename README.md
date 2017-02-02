@@ -122,7 +122,7 @@ module add --name=org.postgresql --resources=/POSTGRESQL_JDBC_JAR_PATH/postgresq
  
  ### To put the authorization into wildfly we must add in standalone-full.xml at `<subsystem xmlns="urn:jboss:domain:security:1.2">` -> `<security-domains>`    the following :
  
- <security-domain name="library" cache-type="default">
+ 	<security-domain name="library" cache-type="default">
                     <authentication>
                         <login-module code="Database" flag="required">
                             <module-option name="dsJndiName" value="java:jboss/datasources/library"/>
@@ -134,7 +134,9 @@ module add --name=org.postgresql --resources=/POSTGRESQL_JDBC_JAR_PATH/postgresq
                             <module-option name="hashUserPassword" value="true"/>
                         </login-module>
                     </authentication>
-                </security-domain>  
+                </security-domain> 
+		
+		
 #DOCKER CONFIGURATION FOR POSTGRESQL
 
 ##INSTALL DOCKER
