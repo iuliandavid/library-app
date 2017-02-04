@@ -25,7 +25,7 @@ public interface AuthorServices {
 
 	void update(Author author) throws FieldNotValidException, AuthorNotFoundException;
 
-	Author findById(long id);
+	Author findById(Long id);
 
 	List<Author> findAll();
 

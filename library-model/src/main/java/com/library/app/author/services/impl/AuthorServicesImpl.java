@@ -70,7 +70,7 @@ public class AuthorServicesImpl implements AuthorServices {
 	 * @see com.library.app.author.services.AuthorServices#findById(long)
 	 */
 	@Override
-	public Author findById(final long id) {
+	public Author findById(final Long id) {
 		final Author authorFound = authorRepository.findById(id);
 		if (authorFound == null) {
 			throw new AuthorNotFoundException();

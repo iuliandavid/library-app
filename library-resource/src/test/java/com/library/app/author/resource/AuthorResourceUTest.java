@@ -137,6 +137,7 @@ public class AuthorResourceUTest {
 	}
 
 	// Test findByfilter
+	@SuppressWarnings("unchecked")
 	@Test
 	public void findFilterNoFilter() {
 		final List<Author> authors = Arrays.asList(
@@ -153,6 +154,7 @@ public class AuthorResourceUTest {
 		assertJsonResponseWithFile(response, "authorsAllInOnePage.json");
 	}
 
+	@SuppressWarnings({ "unused", "unchecked" })
 	@Test
 	public void findByFilterAndPaginationAndOrderingDescendingByName() {
 		final List<Author> authors = Arrays.asList(authorWithId(robertMartin(), 1L),
