@@ -30,8 +30,8 @@ public final class BookForTestsRepository {
 
 	public static Book cleanCode() {
 		final Book book = new Book();
-		book.setTitle("Clean Code: A Handbook of Agile Software Craftmanship");
-		book.setDescription("Even bad code can function. But if code isn't clean, ....");
+		book.setTitle("Clean Code: A Handbook of Agile Software Craftsmanship");
+		book.setDescription("Even bad code can function. But if code isn't clean, ...");
 		book.setCategory(CategoryForTestsRepository.cleanCode());
 		book.addAuthor(robertMartin());
 		book.setPrice(35.06);

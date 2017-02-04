@@ -24,6 +24,7 @@ import com.library.app.common.model.PaginatedData;
  */
 @Local
 public interface BookServices {
+
 	Book add(Book book) throws FieldNotValidException, CategoryNotFoundException, AuthorNotFoundException;
 
 	void update(Book book) throws FieldNotValidException, CategoryNotFoundException, AuthorNotFoundException,

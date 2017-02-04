@@ -94,6 +94,10 @@ public class Author implements Serializable {
 		this.name = name;
 	}
 
+	public Author(final long id) {
+		this.id = id;
+	}
+
 	/**
 	 * @return the name
 	 */

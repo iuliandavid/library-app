@@ -67,6 +67,10 @@ public class Category implements Serializable {
 		this.name = name;
 	}
 
+	public Category(final Long id) {
+		this.id = id;
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
