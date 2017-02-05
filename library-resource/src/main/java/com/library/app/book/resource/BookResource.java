@@ -65,7 +65,6 @@ public class BookResource {
 	@POST
 	public Response add(final String bodyPost) {
 		logger.debug("Adding a new book with body {}", bodyPost);
-
 		Book book = bookJsonConverter.convertFrom(bodyPost);
 
 		HttpCode httpCode = HttpCode.CREATED;
@@ -80,11 +79,11 @@ public class BookResource {
 		} catch (final CategoryNotFoundException e) {
 			httpCode = HttpCode.VALIDATION_ERROR;
 			logger.error("Category not found for book", e);
-			result = getOperationResultInvalidField(RESOURCE_MESSAGE, "category");
+			result = getOperationResultDependencyNotFound(RESOURCE_MESSAGE, "category");
 		} catch (final AuthorNotFoundException e) {
 			httpCode = HttpCode.VALIDATION_ERROR;
 			logger.error("Author not found for book", e);
-			result = getOperationResultInvalidField(RESOURCE_MESSAGE, "author");
+			result = getOperationResultDependencyNotFound(RESOURCE_MESSAGE, "author");
 		}
 
 		logger.debug("Returning the operation result after adding book: {}", result);
