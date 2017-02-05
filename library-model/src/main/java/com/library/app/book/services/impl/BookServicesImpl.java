@@ -24,6 +24,7 @@ import com.library.app.category.model.Category;
 import com.library.app.category.services.CategoryServices;
 import com.library.app.common.exception.FieldNotValidException;
 import com.library.app.common.model.PaginatedData;
+import com.library.app.common.model.filter.FilterValidationException;
 import com.library.app.common.utils.ValidationUtils;
 
 /**
@@ -107,7 +108,11 @@ public class BookServicesImpl implements BookServices {
 	 */
 	@Override
 	public PaginatedData<Book> findByFilter(final BookFilter bookFilter) {
-		return bookRepository.findByFilter(bookFilter);
+		try {
+			return bookRepository.findByFilter(bookFilter);
+		} catch (final Exception e) {
+			throw new FilterValidationException();
+		}
 	}
 
 	private void checkAuthorsAndSetThemOnBook(final Book book) {

@@ -18,6 +18,7 @@ import com.library.app.author.model.filter.AuthorFilter;
 import com.library.app.author.repository.AuthorRepository;
 import com.library.app.author.services.AuthorServices;
 import com.library.app.common.model.PaginatedData;
+import com.library.app.common.model.filter.FilterValidationException;
 
 /**
  * Since there is a pool of {@link Stateless} ejbs is more useful and scalable to use the {@link Stateless} instead of
@@ -90,7 +91,11 @@ public class AuthorServicesImpl implements AuthorServices {
 
 	@Override
 	public PaginatedData<Author> findByFilter(final AuthorFilter filter) {
-		return authorRepository.findByFilter(filter);
+		try {
+			return authorRepository.findByFilter(filter);
+		} catch (final Exception e) {
+			throw new FilterValidationException();
+		}
 	}
 
 }

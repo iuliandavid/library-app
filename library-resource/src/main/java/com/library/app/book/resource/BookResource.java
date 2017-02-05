@@ -39,6 +39,7 @@ import com.library.app.common.model.HttpCode;
 import com.library.app.common.model.OperationResult;
 import com.library.app.common.model.PaginatedData;
 import com.library.app.common.model.ResourceMessage;
+import com.library.app.common.model.filter.FilterValidationException;
 
 /**
  * @author iulian
@@ -150,14 +151,21 @@ public class BookResource {
 		final BookFilter bookFilter = new BookFilterExtractorFromUrl(uriInfo).getFilter();
 		logger.debug("Finding books using filter: {}", bookFilter);
 
-		final PaginatedData<Book> books = bookServices.findByFilter(bookFilter);
+		try {
+			final PaginatedData<Book> books = bookServices.findByFilter(bookFilter);
 
-		logger.debug("Found {} books", books.getNumberOfRows());
+			logger.debug("Found {} books", books.getNumberOfRows());
 
-		final JsonElement jsonWithPagingAndEntries = JsonUtils.getJsonElementWithPagingAndEntries(books,
-				bookJsonConverter);
-		return Response.status(HttpCode.OK.getCode()).entity(JsonWriter.writeToString(jsonWithPagingAndEntries))
-				.build();
+			final JsonElement jsonWithPagingAndEntries = JsonUtils.getJsonElementWithPagingAndEntries(books,
+					bookJsonConverter);
+			return Response.status(HttpCode.OK.getCode()).entity(JsonWriter.writeToString(jsonWithPagingAndEntries))
+					.build();
+		} catch (final FilterValidationException e) {
+			logger.error("No user found for the given id", e);
+			final OperationResult result = getOperationResultDependencyNotFound(RESOURCE_MESSAGE, "filter");
+			return Response.status(HttpCode.VALIDATION_ERROR.getCode()).entity(OperationResultJsonWriter.toJson(result))
+					.build();
+		}
 	}
 
 }

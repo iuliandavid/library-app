@@ -13,6 +13,7 @@ import com.library.app.book.model.filter.BookFilter;
 import com.library.app.category.exception.CategoryNotFoundException;
 import com.library.app.common.exception.FieldNotValidException;
 import com.library.app.common.model.PaginatedData;
+import com.library.app.common.model.filter.FilterValidationException;
 
 /**
  * The contract for the {@link Author} services
@@ -32,5 +33,5 @@ public interface BookServices {
 
 	Book findById(Long id) throws BookNotFoundException;
 
-	PaginatedData<Book> findByFilter(BookFilter bookFilter);
+	PaginatedData<Book> findByFilter(BookFilter bookFilter) throws FilterValidationException;
 }
