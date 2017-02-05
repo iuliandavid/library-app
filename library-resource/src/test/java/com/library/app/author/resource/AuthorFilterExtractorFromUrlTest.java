@@ -96,7 +96,6 @@ public class AuthorFilterExtractorFromUrlTest {
 		assertThat(authorFilter.getName(), is(equalTo("Robert")));
 	}
 
-	@SuppressWarnings({ "unused", "unchecked" })
 	private void setUpUriInfo(final String page, final String perPage, final String name, final String sort) {
 		final Map<String, String> parameters = new LinkedHashMap<>();
 		parameters.put("page", page);

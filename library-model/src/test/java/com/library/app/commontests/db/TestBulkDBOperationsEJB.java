@@ -13,6 +13,7 @@ import javax.persistence.PersistenceContext;
 import org.junit.Ignore;
 
 import com.library.app.author.model.Author;
+import com.library.app.book.model.Book;
 import com.library.app.category.model.Category;
 import com.library.app.user.model.User;
 
@@ -23,7 +24,8 @@ public class TestBulkDBOperationsEJB {
 	@PersistenceContext
 	EntityManager em;
 
-	private static final List<Class<?>> ENTITIES_TO_REMOVE = Arrays.asList(Category.class, Author.class, User.class);
+	private static final List<Class<?>> ENTITIES_TO_REMOVE = Arrays.asList(Book.class, Category.class, Author.class,
+			User.class);
 
 	public void deleteAll() {
 		for (final Class<?> entityClass : ENTITIES_TO_REMOVE) {

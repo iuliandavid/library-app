@@ -19,7 +19,7 @@ import javax.validation.constraints.Size;
  *
  */
 @Entity
-@Table(name = "lib_author", indexes = { @Index(columnList = "name") })
+@Table(name = "authors", indexes = { @Index(columnList = "name") })
 public class Author implements Serializable {
 
 	/** The serial ID, needed especially for the JMS in WildFly */
@@ -92,6 +92,10 @@ public class Author implements Serializable {
 	 */
 	public Author(final String name) {
 		this.name = name;
+	}
+
+	public Author(final long id) {
+		this.id = id;
 	}
 
 	/**

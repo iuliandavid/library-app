@@ -14,6 +14,7 @@ public class ResourceMessage {
 	private static final String MESSAGE_INVALID_FIELD = "%s.invalidField.%s";
 	private static final String KEY_NOT_FOUND = "%s.NotFound";
 	private static final String MESSAGE_NOT_FOUND = "%s not found";
+	private static final String NOT_FOUND = "Not found";
 
 	public ResourceMessage(final String resource) {
 		this.resource = resource;
@@ -39,4 +40,7 @@ public class ResourceMessage {
 		return String.format(MESSAGE_NOT_FOUND, resource);
 	}
 
+	public String getMessageNotFound() {
+		return NOT_FOUND;
+	}
 }

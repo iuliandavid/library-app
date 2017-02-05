@@ -143,6 +143,16 @@ module add --name=org.postgresql --resources=/POSTGRESQL_JDBC_JAR_PATH/postgresq
 https://www.docker.com/products/docker
 ##INSTALL POSTGRESQL IMAGE
 ```sh
-docker run -p 5433:5432 --name postres9.4-db -d postgres:9.4
+docker run -p 5434:5432 --name postres9.4-db -d postgres:9.4
 ```
 __NOTE:__ In this example the PostgreSQL port is forwarded to **5433**
+
+
+## INTEGRATION TESTS AFTER ADDING AUTHENTICATION TO APP
+
+### POSTMAN CONFIGURATION AND REQUEST EXAMPLE 
+
+
+[![authentication](https://cloud.githubusercontent.com/assets/7404474/22626154/04f97fc6-ebb0-11e6-86d0-9f72e59c2a26.png)]
+
+[![postcategory](https://cloud.githubusercontent.com/assets/7404474/22626151/daa3eaa4-ebaf-11e6-82f5-1b48614200bc.png)]

@@ -23,7 +23,7 @@ public interface CategoryServices {
 
 	void update(Category category) throws FieldNotValidException, CategoryExistentException;
 
-	Category findById(long id);
+	Category findById(Long id);
 
 	List<Category> findAll();
 }

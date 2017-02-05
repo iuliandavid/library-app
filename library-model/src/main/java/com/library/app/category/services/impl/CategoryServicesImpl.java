@@ -56,7 +56,7 @@ public class CategoryServicesImpl implements CategoryServices {
 	}
 
 	@Override
-	public Category findById(final long id) {
+	public Category findById(final Long id) {
 		final Category foundCategory = categoryRepository.findById(id);
 		if (foundCategory == null) {
 			throw new CategoryNotFoundException();

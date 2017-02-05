@@ -18,7 +18,7 @@ import javax.validation.constraints.Size;
  *
  */
 @Entity
-@Table(name = "lib_category")
+@Table(name = "categories")
 public class Category implements Serializable {
 
 	/**
@@ -65,6 +65,10 @@ public class Category implements Serializable {
 	 */
 	public Category(final String name) {
 		this.name = name;
+	}
+
+	public Category(final Long id) {
+		this.id = id;
 	}
 
 	@Override
