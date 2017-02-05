@@ -151,7 +151,6 @@ __NOTE:__ In this example the PostgreSQL port is forwarded to **5433**
 ### POSTMAN CONFIGURATION AND REQUEST EXAMPLE 
 
 
-<img width="946" alt="postcategory" src="https://cloud.githubusercontent.com/assets/7404474/22626151/daa3eaa4-ebaf-11e6-82f5-1b48614200bc.png">
+[![authentication](https://cloud.githubusercontent.com/assets/7404474/22626154/04f97fc6-ebb0-11e6-86d0-9f72e59c2a26.png)]
 
-
-<img width="948" alt="authentication" src="https://cloud.githubusercontent.com/assets/7404474/22626154/04f97fc6-ebb0-11e6-86d0-9f72e59c2a26.png">
+[![postcategory](https://cloud.githubusercontent.com/assets/7404474/22626151/daa3eaa4-ebaf-11e6-82f5-1b48614200bc.png)]
