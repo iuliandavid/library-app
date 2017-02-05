@@ -103,6 +103,125 @@ public class BookResourceIntTest {
 		findBookAndAssertResponseWithBook(bookId, designPatterns());
 	}
 
+	@Test
+	@RunAsClient
+	public void addBookWithNullTitle() {
+		final Book book = normalizeDependenciesWithRest(cleanCode());
+		book.setTitle(null);
+		addBookWithValidationError(book, "bookErrorNullTitle.json");
+
+	}
+
+	@Test
+	@RunAsClient
+	public void addBookWithInexistentCategory() {
+		final Book book = normalizeDependenciesWithRest(cleanCode());
+		book.getCategory().setId(999L);
+		addBookWithValidationError(book, "bookErrorInexistentCategory.json");
+
+	}
+
+	@Test
+	@RunAsClient
+	public void addBookWithInexistentAuthor() {
+		final Book book = normalizeDependenciesWithRest(cleanCode());
+		book.getAuthors().get(0).setId(999L);
+		addBookWithValidationError(book, "bookErrorInexistentAuthor.json");
+
+	}
+
+	@Test
+	@RunAsClient
+	public void updateValidBook() {
+		final Long bookId = addBookAndGetId(normalizeDependenciesWithRest(designPatterns()));
+		findBookAndAssertResponseWithBook(bookId, designPatterns());
+
+		final Book book = normalizeDependenciesWithRest(designPatterns());
+		book.setPrice(10D);
+		book.getAuthors().remove(0);
+
+		final Response response = resourceClient.resourcePath(PATH_RESOURCE + "/" + bookId)
+				.putWithContent(getJsonForBook(book));
+		assertThat(response.getStatus(), is(equalTo(HttpCode.OK.getCode())));
+		findBookAndAssertResponseWithBook(bookId, book);
+
+	}
+
+	@Test
+	@RunAsClient
+	public void updateBookNotFound() {
+		final Book book = normalizeDependenciesWithRest(cleanCode());
+		final Response response = resourceClient.resourcePath(PATH_RESOURCE + "/" + 999L)
+				.putWithContent(getJsonForBook(book));
+		assertThat(response.getStatus(), is(equalTo(HttpCode.NOT_FOUND.getCode())));
+	}
+
+	@Test
+	@RunAsClient
+	public void findBookNotFound() {
+		final Response response = resourceClient.resourcePath(PATH_RESOURCE + "/999").get();
+		assertThat(response.getStatus(), is(equalTo(HttpCode.NOT_FOUND.getCode())));
+	}
+
+	@Test
+	@RunAsClient
+	public void findByFilterPaginationAndOrderingDesscendingByTitle() {
+		// load all books
+		resourceClient.resourcePath("DB/" + PATH_RESOURCE).postWithContent("");
+
+		// first page
+		Response response = resourceClient.resourcePath(PATH_RESOURCE + "?page=0&per_page=3&sort=-title").get();
+		assertThat(response.getStatus(), is(equalTo(HttpCode.OK.getCode())));
+		assertResponseContainsTheBooks(response, 5, refactoring(), peaa(), effectiveJava());
+
+		// second page
+		response = resourceClient.resourcePath(PATH_RESOURCE + "?page=1&per_page=3&sort=-title").get();
+		assertThat(response.getStatus(), is(equalTo(HttpCode.OK.getCode())));
+		assertResponseContainsTheBooks(response, 5, designPatterns(), cleanCode());
+	}
+
+	@Test
+	@RunAsClient
+	public void findByFilterWithNoUser() {
+		final Response response = resourceClient.user(null).resourcePath(PATH_RESOURCE).get();
+		assertThat(response.getStatus(), is(equalTo(HttpCode.UNAUTHORIZED.getCode())));
+	}
+
+	@Test
+	@RunAsClient
+	public void findByFilterWithUserCustomer() {
+		final Response response = resourceClient.user(johnDoe()).resourcePath(PATH_RESOURCE).get();
+		assertThat(response.getStatus(), is(equalTo(HttpCode.OK.getCode())));
+	}
+
+	@Test
+	@RunAsClient
+	public void findByIdIdWithUserCustomer() {
+		final Response response = resourceClient.user(johnDoe()).resourcePath(PATH_RESOURCE + "/999").get();
+		assertThat(response.getStatus(), is(equalTo(HttpCode.FORBIDDEN.getCode())));
+	}
+
+	private void assertResponseContainsTheBooks(final Response response, final int expectedTotalRecords,
+			final Book... expectedBooks) {
+
+		final JsonArray booksList = IntegrationTestUtils.assertJsonHasTheNumberOfElementsAndReturnTheEntries(response,
+				expectedTotalRecords, expectedBooks.length);
+
+		for (int i = 0; i < expectedBooks.length; i++) {
+			final Book expectedBook = expectedBooks[i];
+			assertThat(booksList.get(i).getAsJsonObject().get("title").getAsString(),
+					is(equalTo(expectedBook.getTitle())));
+		}
+
+	}
+
+	private void addBookWithValidationError(final Book book, final String fileName) {
+		final Response response = resourceClient.resourcePath(PATH_RESOURCE).postWithContent(getJsonForBook(book));
+
+		assertThat(response.getStatus(), is(equalTo(HttpCode.VALIDATION_ERROR.getCode())));
+		assertJsonResponseWithFile(response, fileName);
+	}
+
 	/**
 	 * @param book
 	 */
@@ -152,31 +271,6 @@ public class BookResourceIntTest {
 		assertThat(JsonReader.getLongOrNull(categoryAsJson, "id"), is(notNullValue()));
 		final Long categoryID = JsonReader.getLongOrNull(categoryAsJson, "id");
 		return new Category(categoryID);
-	}
-
-	@Test
-	@RunAsClient
-	public void addBookWithNullTitle() {
-		final Response response = resourceClient.resourcePath(PATH_RESOURCE).postWithFile(
-				getPathFileRequest(PATH_RESOURCE, "bookWithNullTitle.json"));
-
-		assertThat(response.getStatus(), is(equalTo(HttpCode.VALIDATION_ERROR.getCode())));
-		assertJsonResponseWithFile(response, "bookErrorNullTitle.json");
-	}
-
-	@Test
-	@RunAsClient
-	public void updateBookNotFound() {
-		final Response response = resourceClient.resourcePath(PATH_RESOURCE + "/999").putWithFile(
-				getPathFileRequest(PATH_RESOURCE, "cleanCode.json"));
-		assertThat(response.getStatus(), is(equalTo(HttpCode.NOT_FOUND.getCode())));
-	}
-
-	@Test
-	@RunAsClient
-	public void findBookNotFound() {
-		final Response response = resourceClient.resourcePath(PATH_RESOURCE + "/999").get();
-		assertThat(response.getStatus(), is(equalTo(HttpCode.NOT_FOUND.getCode())));
 	}
 
 	private void assertJsonResponseWithFile(final Response response, final String fileName) {

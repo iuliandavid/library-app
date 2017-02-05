@@ -1,7 +1,7 @@
 /**
  * 
  */
-package com.library.app.category.resource;
+package com.library.app.commontests.utils;
 
 import javax.inject.Inject;
 import javax.ws.rs.DELETE;

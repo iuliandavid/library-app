@@ -24,8 +24,8 @@ public class TestBulkDBOperationsEJB {
 	@PersistenceContext
 	EntityManager em;
 
-	private static final List<Class<?>> ENTITIES_TO_REMOVE = Arrays.asList(Category.class, Author.class, User.class,
-			Book.class);
+	private static final List<Class<?>> ENTITIES_TO_REMOVE = Arrays.asList(Book.class, Category.class, Author.class,
+			User.class);
 
 	public void deleteAll() {
 		for (final Class<?> entityClass : ENTITIES_TO_REMOVE) {
