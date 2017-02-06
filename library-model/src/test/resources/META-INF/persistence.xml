@@ -4,13 +4,16 @@
 	xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd">
 
 	<persistence-unit name="libraryPU" transaction-type="RESOURCE_LOCAL">
-		<provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
+		<provider>org.hibernate.ejb.HibernatePersistence</provider>
 		<class>com.library.app.category.model.Category</class>
 		<class>com.library.app.author.model.Author</class>
 		<class>com.library.app.user.model.User</class>
 		<class>com.library.app.user.model.Customer</class>
 		<class>com.library.app.user.model.Employee</class>
 		<class>com.library.app.book.model.Book</class>
+		<class>com.library.app.order.model.Order</class>
+		<class>com.library.app.order.model.OrderItem</class>
+		<class>com.library.app.order.model.OrderHistoryEntry</class>
 
 		<properties>
 			<property name="hibernate.show_sql" value="true" />
