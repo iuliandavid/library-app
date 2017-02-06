@@ -6,7 +6,6 @@ package com.library.app.book.services;
 import javax.ejb.Local;
 
 import com.library.app.author.exception.AuthorNotFoundException;
-import com.library.app.author.model.Author;
 import com.library.app.book.exception.BookNotFoundException;
 import com.library.app.book.model.Book;
 import com.library.app.book.model.filter.BookFilter;
@@ -16,7 +15,7 @@ import com.library.app.common.model.PaginatedData;
 import com.library.app.common.model.filter.FilterValidationException;
 
 /**
- * The contract for the {@link Author} services
+ * The contract for the {@link Book} services
  * 
  * It will not be a remote call, that's why it'a annotated as {@link Local}
  * 
