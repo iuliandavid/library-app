@@ -4,6 +4,7 @@
 package com.library.app.order.services.impl;
 
 import static com.library.app.commontests.book.BookForTestsRepository.*;
+import static com.library.app.commontests.order.OrderArgumentMatcher.*;
 import static com.library.app.commontests.order.OrderForTestsRepository.*;
 import static com.library.app.commontests.user.UserForTestsRepository.*;
 import static org.hamcrest.CoreMatchers.*;
@@ -12,6 +13,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import java.security.Principal;
+import java.util.Arrays;
 
 import javax.ejb.SessionContext;
 import javax.ejb.Stateful;
@@ -29,8 +31,14 @@ import com.library.app.book.exception.BookNotFoundException;
 import com.library.app.book.services.BookServices;
 import com.library.app.category.services.CategoryServices;
 import com.library.app.common.exception.FieldNotValidException;
+import com.library.app.common.exception.UserNotAuthorizedException;
+import com.library.app.common.model.PaginatedData;
 import com.library.app.commontests.category.CategoryForTestsRepository;
+import com.library.app.order.exception.OrderNotFoundException;
+import com.library.app.order.exception.OrderStatusCannotBeChangedException;
 import com.library.app.order.model.Order;
+import com.library.app.order.model.Order.OrderStatus;
+import com.library.app.order.model.filter.OrderFilter;
 import com.library.app.order.repository.OrderRepository;
 import com.library.app.order.services.OrderServices;
 import com.library.app.user.exception.UserNotFoundException;
@@ -136,6 +144,86 @@ public class OrderServicesUTest {
 		order.getItems().iterator().next().setBook(null);
 
 		addOrderWithInvalidField(order, "items[].book");
+	}
+
+	@Test
+	public void addValidOrder() {
+		when(userServices.findByEmail(LOGGED_EMAIL)).thenReturn(johnDoe());
+		when(bookServices.findById(1l)).thenReturn(bookWithId(designPatterns(), 1L));
+		when(bookServices.findById(2l)).thenReturn(bookWithId(refactoring(), 2L));
+		when(orderRepository.add(orderEq(orderReserved()))).thenReturn(orderWithId(orderReserved(), 1l));
+
+		final Order order = new Order();
+		order.setItems(orderReserved().getItems());
+
+		final Long id = orderServices.add(order).getId();
+		assertThat(id, is(notNullValue()));
+	}
+
+	@Test(expected = OrderNotFoundException.class)
+	public void findOrderByIdNotFound() {
+		when(orderRepository.findById(1L)).thenReturn(null);
+		orderServices.findById(1l);
+	}
+
+	@Test
+	public void findOrderById() {
+		when(orderRepository.findById(1L)).thenReturn(orderWithId(orderReserved(), 1l));
+		final Order order = orderServices.findById(1l);
+		assertThat(order, is(notNullValue()));
+	}
+
+	@Test(expected = OrderNotFoundException.class)
+	public void updateStatusOrderNotFound() {
+		when(orderRepository.findById(1L)).thenReturn(null);
+		orderServices.updateStatus(1l, OrderStatus.DELIVERED);
+	}
+
+	@Test(expected = OrderStatusCannotBeChangedException.class)
+	public void updateStatusInvalidStatus() {
+		when(orderRepository.findById(1L)).thenReturn(orderWithId(orderReserved(), 1l));
+		orderServices.updateStatus(1l, OrderStatus.RESERVED);
+	}
+
+	@Test(expected = UserNotAuthorizedException.class)
+	public void updateStatusDeliveredAsNotEmployee() {
+		setUpLoggedEmail(LOGGED_EMAIL, Roles.CUSTOMER);
+		when(orderRepository.findById(1L)).thenReturn(orderWithId(orderReserved(), 1l));
+		orderServices.updateStatus(1l, OrderStatus.DELIVERED);
+	}
+
+	@Test
+	public void updateStatusDeliveredAsEmployee() {
+		setUpLoggedEmail(LOGGED_EMAIL, Roles.EMPLOYEE);
+		when(orderRepository.findById(1L)).thenReturn(orderWithId(orderReserved(), 1l));
+		orderServices.updateStatus(1l, OrderStatus.DELIVERED);
+	}
+
+	@Test(expected = UserNotAuthorizedException.class)
+	public void updateStatusCancelledAsCustomerNotTheOrderCustomer() {
+		setUpLoggedEmail(LOGGED_EMAIL, Roles.CUSTOMER);
+		when(orderRepository.findById(1L)).thenReturn(orderWithId(orderReserved(), 1l));
+		orderServices.updateStatus(1l, OrderStatus.CANCELLED);
+	}
+
+	@Test
+	public void updateStatusCancelledAsCustomerTheOrderCustomer() {
+		setUpLoggedEmail(orderReserved().getCustomer().getEmail(), Roles.CUSTOMER);
+		when(orderRepository.findById(1L)).thenReturn(orderWithId(orderReserved(), 1l));
+		orderServices.updateStatus(1l, OrderStatus.CANCELLED);
+
+		final Order expectedOrder = orderWithId(orderReserved(), 1l);
+		expectedOrder.addHistoryEntry(OrderStatus.CANCELLED);
+		verify(orderRepository).update(orderEq(expectedOrder));
+	}
+
+	@Test
+	public void findByFilter() {
+		final PaginatedData<Order> orders = new PaginatedData<>(2, Arrays.asList(orderReserved(), orderDelivered()));
+		when(orderRepository.findByFilter((OrderFilter) any())).thenReturn(orders);
+		final PaginatedData<Order> ordersReturned = orderServices.findByFilter(new OrderFilter());
+		assertThat(ordersReturned.getNumberOfRows(), is(equalTo(2)));
+		assertThat(ordersReturned.getRows().size(), is(equalTo(2)));
 	}
 
 	private void addOrderWithInvalidField(final Order order, final String invalidField) {

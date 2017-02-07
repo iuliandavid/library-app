@@ -25,7 +25,7 @@ public class OrderArgumentMatcher implements ArgumentMatcher<Order> {
 		this.expectedOder = expectedOrder;
 	}
 
-	public static Order bookEq(final Order expectedOrder) {
+	public static Order orderEq(final Order expectedOrder) {
 		return argThat(new OrderArgumentMatcher(expectedOrder));
 	}
 
