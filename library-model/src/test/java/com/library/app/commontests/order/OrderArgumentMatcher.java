@@ -1,6 +1,3 @@
-/**
- * 
- */
 package com.library.app.commontests.order;
 
 import static org.hamcrest.CoreMatchers.*;
@@ -16,29 +13,28 @@ import com.library.app.order.model.Order;
  *
  */
 public class OrderArgumentMatcher implements ArgumentMatcher<Order> {
-	private Order expectedOder;
+	private Order expected;
 
-	/**
-	 * @param expectedOrder
-	 */
-	public OrderArgumentMatcher(final Order expectedOrder) {
-		this.expectedOder = expectedOrder;
+	public static Order orderEq(final Order expected) {
+		return argThat(new OrderArgumentMatcher(expected));
 	}
 
-	public static Order orderEq(final Order expectedOrder) {
-		return argThat(new OrderArgumentMatcher(expectedOrder));
+	public OrderArgumentMatcher(final Order expected) {
+		this.expected = expected;
 	}
 
 	@Override
-	public boolean matches(final Order actualOrder) {
-		assertThat(actualOrder.getId(), is(equalTo(expectedOder.getId())));
-		assertThat(actualOrder.getCustomer(), is(equalTo(expectedOder.getCustomer())));
+	public boolean matches(final Order actual) {
 
-		assertThat(actualOrder.getItems(), is(equalTo(expectedOder.getItems())));
+		assertThat(actual.getId(), is(equalTo(expected.getId())));
+		assertThat(actual.getCustomer(), is(equalTo(expected.getCustomer())));
 
-		assertThat(actualOrder.getTotal(), is(equalTo(expectedOder.getTotal())));
-		assertThat(actualOrder.getHistoryEntries(), is(equalTo(expectedOder.getHistoryEntries())));
-		assertThat(actualOrder.getCurrentStatus(), is(equalTo(expectedOder.getCurrentStatus())));
+		assertThat(actual.getItems(), is(equalTo(expected.getItems())));
+
+		assertThat(actual.getTotal(), is(equalTo(expected.getTotal())));
+		assertThat(actual.getHistoryEntries(), is(equalTo(expected.getHistoryEntries())));
+		assertThat(actual.getCurrentStatus(), is(equalTo(expected.getCurrentStatus())));
+
 		return true;
 	}
 
