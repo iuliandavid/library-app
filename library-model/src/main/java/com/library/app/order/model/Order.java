@@ -45,7 +45,7 @@ public class Order implements Serializable {
 	@NotNull
 	private Customer customer;
 
-	@ElementCollection(fetch = FetchType.EAGER)
+	@ElementCollection(fetch = FetchType.LAZY)
 	@CollectionTable(name = "order_items", joinColumns = @JoinColumn(name = "order_id"))
 	@NotNull
 	@Size(min = 1)
@@ -59,7 +59,7 @@ public class Order implements Serializable {
 		RESERVED, RESERVATION_EXPIRED, DELIVERED, CANCELLED
 	}
 
-	@ElementCollection(fetch = FetchType.EAGER)
+	@ElementCollection(fetch = FetchType.LAZY)
 	@CollectionTable(name = "orders_history", joinColumns = @JoinColumn(name = "order_id"))
 	@NotNull
 	@Size(min = 1)
@@ -181,18 +181,23 @@ public class Order implements Serializable {
 
 	@Override
 	public boolean equals(final Object obj) {
-		if (this == obj)
+		if (this == obj) {
 			return true;
-		if (obj == null)
+		}
+		if (obj == null) {
 			return false;
-		if (getClass() != obj.getClass())
+		}
+		if (getClass() != obj.getClass()) {
 			return false;
+		}
 		final Order other = (Order) obj;
 		if (id == null) {
-			if (other.id != null)
+			if (other.id != null) {
 				return false;
-		} else if (!id.equals(other.id))
+			}
+		} else if (!id.equals(other.id)) {
 			return false;
+		}
 		return true;
 	}
 
