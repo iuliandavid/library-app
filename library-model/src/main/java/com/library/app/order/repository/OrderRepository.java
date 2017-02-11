@@ -6,7 +6,7 @@ package com.library.app.order.repository;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.ejb.Stateful;
+import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.FetchType;
 import javax.persistence.PersistenceContext;
@@ -20,7 +20,7 @@ import com.library.app.order.model.filter.OrderFilter;
  * @author iulian
  *
  */
-@Stateful
+@Stateless
 public class OrderRepository extends GenericRepository<Order> {
 
 	@PersistenceContext
