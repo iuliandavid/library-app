@@ -5,6 +5,7 @@ package com.library.app.commontests.order;
 
 import static com.library.app.commontests.book.BookForTestsRepository.*;
 import static com.library.app.commontests.user.UserForTestsRepository.*;
+import static com.library.app.commontests.utils.TestRepositoryUtils.*;
 
 import javax.persistence.EntityManager;
 
@@ -19,7 +20,7 @@ import com.library.app.user.model.Customer;
  * @author iulian
  *
  */
-public class OrderForTestsRepository {
+public final class OrderForTestsRepository {
 
 	private OrderForTestsRepository() {
 	}
@@ -70,13 +71,4 @@ public class OrderForTestsRepository {
 		return order;
 	}
 
-	@SuppressWarnings("unchecked")
-	private static <T> T findByPropertyNameAndValue(final EntityManager em, final Class<T> clazz,
-			final String propertyName, final String propertyValue) {
-		return (T) em
-				.createQuery("Select o From " + clazz.getSimpleName() +
-						" o Where o." + propertyName + " = :propertyValue")
-				.setParameter("propertyValue", propertyValue)
-				.getSingleResult();
-	}
 }

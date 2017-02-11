@@ -8,6 +8,7 @@ import java.util.Map;
 
 import javax.ejb.Stateful;
 import javax.persistence.EntityManager;
+import javax.persistence.FetchType;
 import javax.persistence.PersistenceContext;
 
 import com.library.app.common.model.PaginatedData;
@@ -33,6 +34,22 @@ public class OrderRepository extends GenericRepository<Order> {
 	@Override
 	protected EntityManager getEntityManager() {
 		return em;
+	}
+
+	/**
+	 * In order to use as standard the {@link FetchType#LAZY} initialization
+	 * we need specify when {@link FetchType#EAGER} is needed
+	 */
+	@Override
+	public Order findById(final Long id) {
+		final Order order = super.findById(id);
+		if (order != null) {
+			// forcing retrieval of Lazy collections
+			order.getItems().size();
+			order.getHistoryEntries().size();
+		}
+
+		return order;
 	}
 
 	public PaginatedData<Order> findByFilter(final OrderFilter orderFilter) {
