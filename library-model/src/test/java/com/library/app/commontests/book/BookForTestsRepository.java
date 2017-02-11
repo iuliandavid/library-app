@@ -5,6 +5,7 @@ package com.library.app.commontests.book;
 
 import static com.library.app.commontests.author.AuthorForTestsRepository.*;
 import static com.library.app.commontests.category.CategoryForTestsRepository.*;
+import static com.library.app.commontests.utils.TestRepositoryUtils.*;
 
 import java.util.Arrays;
 import java.util.List;
@@ -101,16 +102,6 @@ public final class BookForTestsRepository {
 		}
 
 		return book;
-	}
-
-	@SuppressWarnings("unchecked")
-	private static <T> T findByPropertyNameAndValue(final EntityManager em, final Class<T> clazz,
-			final String propertyName, final String propertyValue) {
-		return (T) em
-				.createQuery("Select o From " + clazz.getSimpleName() +
-						" o Where o." + propertyName + " = :propertyValue")
-				.setParameter("propertyValue", propertyValue)
-				.getSingleResult();
 	}
 
 	public static List<Book> allBooks() {
