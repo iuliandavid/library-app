@@ -63,6 +63,7 @@ public class OrderServicesImpl implements OrderServices {
 	@Resource
 	SessionContext sessionContext;
 
+	/** The {@link Event} variable **/
 	@Inject
 	private Event<Order> orderEvent;
 
@@ -187,6 +188,12 @@ public class OrderServicesImpl implements OrderServices {
 		logger.debug("Orders expired");
 	}
 
+	/**
+	 * Fires the event
+	 * 
+	 * @param order
+	 *            - The order processed
+	 */
 	private void sendEvent(final Order order) {
 		orderEvent.fire(order);
 	}

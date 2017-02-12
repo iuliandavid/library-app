@@ -9,6 +9,8 @@ import org.slf4j.LoggerFactory;
 import com.library.app.order.model.Order;
 
 /**
+ * Defines an observer for {@link Order} events
+ * 
  * @author iulian
  *
  */
@@ -17,6 +19,12 @@ public class OrderNotificationReceiverCDI {
 
 	private Logger logger = LoggerFactory.getLogger(getClass());
 
+	/**
+	 * The method name is irrelevant as long as {@link Observes} annotation
+	 * is set before the parameter
+	 * 
+	 * @param order
+	 */
 	public void receiveEvent(@Observes final Order order) {
 		logger.debug("Order notification received for order: {}", order);
 	}
