@@ -163,7 +163,6 @@ public class OrderServicesImpl implements OrderServices {
 	}
 
 	@Override
-	@Auditable(action = Action.UPDATE)
 	public void changeStatusOfExpiredOrders(final int daysBeforeOrderExpiration) {
 		logger.debug("Finding order to be expired that are reserved with more than {} days", daysBeforeOrderExpiration);
 		final OrderFilter orderFilter = new OrderFilter();
