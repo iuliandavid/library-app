@@ -47,4 +47,7 @@ public class TestBulkDBOperationsEJB {
 
 	}
 
+	public void add(final Object entity) {
+		em.persist(entity);
+	}
 }

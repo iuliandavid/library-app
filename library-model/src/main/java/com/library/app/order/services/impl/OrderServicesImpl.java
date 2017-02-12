@@ -13,11 +13,15 @@ import javax.interceptor.Interceptors;
 import javax.validation.Validator;
 import javax.ws.rs.core.SecurityContext;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.library.app.book.model.Book;
 import com.library.app.book.services.BookServices;
 import com.library.app.common.exception.UserNotAuthorizedException;
 import com.library.app.common.model.PaginatedData;
 import com.library.app.common.model.filter.FilterValidationException;
+import com.library.app.common.utils.DateUtils;
 import com.library.app.common.utils.ValidationUtils;
 import com.library.app.logaudit.interceptor.Auditable;
 import com.library.app.logaudit.interceptor.LogAuditInterceptor;
@@ -57,6 +61,8 @@ public class OrderServicesImpl implements OrderServices {
 
 	@Resource
 	SessionContext sessionContext;
+
+	private Logger logger = LoggerFactory.getLogger(getClass());
 
 	/*
 	 * (non-Javadoc)
@@ -154,6 +160,23 @@ public class OrderServicesImpl implements OrderServices {
 				item.setBook(book);
 			}
 		}
+	}
+
+	@Override
+	@Auditable(action = Action.UPDATE)
+	public void changeStatusOfExpiredOrders(final int daysBeforeOrderExpiration) {
+		logger.debug("Finding order to be expired that are reserved with more than {} days", daysBeforeOrderExpiration);
+		final OrderFilter orderFilter = new OrderFilter();
+		orderFilter.setEndDate(DateUtils.currentDatePlusDays(-daysBeforeOrderExpiration));
+		orderFilter.setStatus(OrderStatus.RESERVED);
+
+		final PaginatedData<Order> ordersToBeExpired = findByFilter(orderFilter);
+		logger.debug("Found {} orders to be expired", ordersToBeExpired.getNumberOfRows());
+		for (final Order order : ordersToBeExpired.getRows()) {
+			updateStatus(order.getId(), OrderStatus.RESERVATION_EXPIRED);
+		}
+
+		logger.debug("Orders expired");
 	}
 
 }
