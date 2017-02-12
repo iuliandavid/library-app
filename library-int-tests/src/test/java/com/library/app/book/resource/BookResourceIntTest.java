@@ -4,6 +4,7 @@
 package com.library.app.book.resource;
 
 import static com.library.app.commontests.book.BookForTestsRepository.*;
+import static com.library.app.commontests.logaudit.LogAuditTestUtils.*;
 import static com.library.app.commontests.user.UserForTestsRepository.*;
 import static com.library.app.commontests.utils.FileTestNameUtils.*;
 import static com.library.app.commontests.utils.JsonTestUtils.*;
@@ -11,6 +12,7 @@ import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 
 import java.net.URL;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.ws.rs.core.Response;
@@ -40,6 +42,8 @@ import com.library.app.commontests.utils.IntegrationTestUtils;
 import com.library.app.commontests.utils.JsonTestUtils;
 import com.library.app.commontests.utils.ResourceClient;
 import com.library.app.commontests.utils.ResourceDefinitions;
+import com.library.app.logaudit.model.LogAudit;
+import com.library.app.logaudit.model.LogAudit.Action;
 
 /**
  * Integration Tests made with Arquillian
@@ -78,6 +82,8 @@ public class BookResourceIntTest {
 
 	private static final String PATH_RESOURCE = ResourceDefinitions.BOOK.getResourceName();
 
+	private static final String ELEMENT_NAME = Book.class.getSimpleName();
+
 	@Deployment
 	public static WebArchive createDeployment() {
 		return ArquillianTestUtils.createDeploymentArchive();
@@ -101,6 +107,8 @@ public class BookResourceIntTest {
 	public void addValidBookAndFindIt() {
 		final Long bookId = addBookAndGetId(normalizeDependenciesWithRest(designPatterns()));
 		findBookAndAssertResponseWithBook(bookId, designPatterns());
+
+		assertAuditLogs(resourceClient, 1, new LogAudit(admin(), Action.ADD, ELEMENT_NAME));
 	}
 
 	@Test
@@ -110,6 +118,7 @@ public class BookResourceIntTest {
 		book.setTitle(null);
 		addBookWithValidationError(book, "bookErrorNullTitle.json");
 
+		assertAuditLogs(resourceClient, 0);
 	}
 
 	@Test
@@ -119,6 +128,8 @@ public class BookResourceIntTest {
 		book.getCategory().setId(999L);
 		addBookWithValidationError(book, "bookErrorInexistentCategory.json");
 
+		assertAuditLogs(resourceClient, 0);
+
 	}
 
 	@Test
@@ -127,6 +138,8 @@ public class BookResourceIntTest {
 		final Book book = normalizeDependenciesWithRest(cleanCode());
 		book.getAuthors().get(0).setId(999L);
 		addBookWithValidationError(book, "bookErrorInexistentAuthor.json");
+
+		assertAuditLogs(resourceClient, 0);
 
 	}
 
@@ -145,6 +158,9 @@ public class BookResourceIntTest {
 		assertThat(response.getStatus(), is(equalTo(HttpCode.OK.getCode())));
 		findBookAndAssertResponseWithBook(bookId, book);
 
+		assertAuditLogs(resourceClient, 2, new LogAudit(admin(), Action.UPDATE, ELEMENT_NAME),
+				new LogAudit(admin(), Action.ADD, ELEMENT_NAME));
+
 	}
 
 	@Test
@@ -154,6 +170,8 @@ public class BookResourceIntTest {
 		final Response response = resourceClient.resourcePath(PATH_RESOURCE + "/" + 999L)
 				.putWithContent(getJsonForBook(book));
 		assertThat(response.getStatus(), is(equalTo(HttpCode.NOT_FOUND.getCode())));
+
+		assertAuditLogs(resourceClient, 0);
 	}
 
 	@Test
@@ -161,6 +179,8 @@ public class BookResourceIntTest {
 	public void findBookNotFound() {
 		final Response response = resourceClient.resourcePath(PATH_RESOURCE + "/999").get();
 		assertThat(response.getStatus(), is(equalTo(HttpCode.NOT_FOUND.getCode())));
+
+		assertAuditLogs(resourceClient, 0);
 	}
 
 	@Test
@@ -174,10 +194,16 @@ public class BookResourceIntTest {
 		assertThat(response.getStatus(), is(equalTo(HttpCode.OK.getCode())));
 		assertResponseContainsTheBooks(response, 5, refactoring(), peaa(), effectiveJava());
 
+		final LogAudit[] logs = new LogAudit[5];
+		Arrays.fill(logs, new LogAudit(admin(), Action.ADD, ELEMENT_NAME));
+		assertAuditLogs(resourceClient, 5, logs);
+
 		// second page
 		response = resourceClient.resourcePath(PATH_RESOURCE + "?page=1&per_page=3&sort=-title").get();
 		assertThat(response.getStatus(), is(equalTo(HttpCode.OK.getCode())));
 		assertResponseContainsTheBooks(response, 5, designPatterns(), cleanCode());
+
+		assertAuditLogs(resourceClient, 5, logs);
 	}
 
 	@Test
@@ -185,6 +211,8 @@ public class BookResourceIntTest {
 	public void findByFilterWithNoUser() {
 		final Response response = resourceClient.user(null).resourcePath(PATH_RESOURCE).get();
 		assertThat(response.getStatus(), is(equalTo(HttpCode.UNAUTHORIZED.getCode())));
+
+		assertAuditLogs(resourceClient, 0);
 	}
 
 	@Test
@@ -192,6 +220,8 @@ public class BookResourceIntTest {
 	public void findByFilterWithUserCustomer() {
 		final Response response = resourceClient.user(johnDoe()).resourcePath(PATH_RESOURCE).get();
 		assertThat(response.getStatus(), is(equalTo(HttpCode.OK.getCode())));
+
+		assertAuditLogs(resourceClient, 0);
 	}
 
 	@Test

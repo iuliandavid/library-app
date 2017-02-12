@@ -9,6 +9,7 @@ import javax.annotation.Resource;
 import javax.ejb.SessionContext;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
+import javax.interceptor.Interceptors;
 import javax.validation.Validator;
 import javax.ws.rs.core.SecurityContext;
 
@@ -18,6 +19,9 @@ import com.library.app.common.exception.UserNotAuthorizedException;
 import com.library.app.common.model.PaginatedData;
 import com.library.app.common.model.filter.FilterValidationException;
 import com.library.app.common.utils.ValidationUtils;
+import com.library.app.logaudit.interceptor.Auditable;
+import com.library.app.logaudit.interceptor.LogAuditInterceptor;
+import com.library.app.logaudit.model.LogAudit.Action;
 import com.library.app.order.exception.OrderNotFoundException;
 import com.library.app.order.exception.OrderStatusCannotBeChangedException;
 import com.library.app.order.model.Order;
@@ -26,7 +30,6 @@ import com.library.app.order.model.OrderItem;
 import com.library.app.order.model.filter.OrderFilter;
 import com.library.app.order.repository.OrderRepository;
 import com.library.app.order.services.OrderServices;
-import com.library.app.user.exception.UserNotFoundException;
 import com.library.app.user.model.Customer;
 import com.library.app.user.model.User;
 import com.library.app.user.model.User.Roles;
@@ -37,6 +40,7 @@ import com.library.app.user.services.UserServices;
  *
  */
 @Stateless
+@Interceptors(LogAuditInterceptor.class)
 public class OrderServicesImpl implements OrderServices {
 
 	@Inject
@@ -60,6 +64,7 @@ public class OrderServicesImpl implements OrderServices {
 	 * @see com.library.app.order.services.OrderServices#add(com.library.app.order.model.Order)
 	 */
 	@Override
+	@Auditable(action = Action.ADD)
 	public Order add(final Order order) {
 		checkCustomerAndSetItOnOrder(order);
 		checkBooksForItemsAndSetThem(order);
@@ -86,6 +91,7 @@ public class OrderServicesImpl implements OrderServices {
 	}
 
 	@Override
+	@Auditable(action = Action.UPDATE)
 	public void updateStatus(final Long id, final OrderStatus newStatus) {
 
 		final Order order = orderRepository.findById(id);
@@ -150,22 +156,4 @@ public class OrderServicesImpl implements OrderServices {
 		}
 	}
 
-	/**
-	 * Based on the fact that {@link SecurityContext} returns
-	 * as {@link Principal} name an unique identifier of the logged user,
-	 * that unique identifier will be the email in our case
-	 * 
-	 * @param id
-	 */
-	private boolean isLoggedUser(final Long id) {
-		try {
-			final String email = sessionContext.getCallerPrincipal().getName();
-			final User loggerUser = userServices.findByEmail(email);
-			if (loggerUser.getId().equals(id)) {
-				return true;
-			}
-		} catch (final UserNotFoundException | NullPointerException e) {
-		}
-		return false;
-	}
 }
