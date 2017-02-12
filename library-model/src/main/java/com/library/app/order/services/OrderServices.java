@@ -36,4 +36,6 @@ public interface OrderServices {
 
 	void updateStatus(Long id, OrderStatus newStatus)
 			throws OrderNotFoundException, OrderStatusCannotBeChangedException, UserNotAuthorizedException;
+
+	void changeStatusOfExpiredOrders(int daysBeforeOrderExpiration);
 }

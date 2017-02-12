@@ -8,16 +8,24 @@ import java.security.Principal;
 import javax.annotation.Resource;
 import javax.ejb.SessionContext;
 import javax.ejb.Stateless;
+import javax.enterprise.event.Event;
 import javax.inject.Inject;
 import javax.interceptor.Interceptors;
+import javax.jms.JMSConnectionFactory;
+import javax.jms.JMSContext;
+import javax.jms.Queue;
 import javax.validation.Validator;
 import javax.ws.rs.core.SecurityContext;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.library.app.book.model.Book;
 import com.library.app.book.services.BookServices;
 import com.library.app.common.exception.UserNotAuthorizedException;
 import com.library.app.common.model.PaginatedData;
 import com.library.app.common.model.filter.FilterValidationException;
+import com.library.app.common.utils.DateUtils;
 import com.library.app.common.utils.ValidationUtils;
 import com.library.app.logaudit.interceptor.Auditable;
 import com.library.app.logaudit.interceptor.LogAuditInterceptor;
@@ -58,6 +66,19 @@ public class OrderServicesImpl implements OrderServices {
 	@Resource
 	SessionContext sessionContext;
 
+	/** The {@link Event} variable **/
+	@Inject
+	private Event<Order> orderEvent;
+
+	@Resource(mappedName = "java:/jms/queue/Orders")
+	private Queue ordersQueue;
+
+	@Inject
+	@JMSConnectionFactory("java:jboss/DefaultJMSConnectionFactory")
+	private JMSContext jmsContext;
+
+	private Logger logger = LoggerFactory.getLogger(getClass());
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -73,6 +94,9 @@ public class OrderServicesImpl implements OrderServices {
 		order.calculateTotal();
 
 		ValidationUtils.validateEntityFields(validator, order);
+
+		sendEvent(order);
+
 		return orderRepository.add(order);
 	}
 
@@ -120,6 +144,8 @@ public class OrderServicesImpl implements OrderServices {
 
 		order.setCurrentStatus(newStatus);
 
+		sendEvent(order);
+
 		orderRepository.update(order);
 	}
 
@@ -156,4 +182,35 @@ public class OrderServicesImpl implements OrderServices {
 		}
 	}
 
+	@Override
+	public void changeStatusOfExpiredOrders(final int daysBeforeOrderExpiration) {
+		logger.debug("Finding order to be expired that are reserved with more than {} days", daysBeforeOrderExpiration);
+		final OrderFilter orderFilter = new OrderFilter();
+		orderFilter.setEndDate(DateUtils.currentDatePlusDays(-daysBeforeOrderExpiration));
+		orderFilter.setStatus(OrderStatus.RESERVED);
+
+		final PaginatedData<Order> ordersToBeExpired = findByFilter(orderFilter);
+		logger.debug("Found {} orders to be expired", ordersToBeExpired.getNumberOfRows());
+		for (final Order order : ordersToBeExpired.getRows()) {
+			updateStatus(order.getId(), OrderStatus.RESERVATION_EXPIRED);
+		}
+
+		logger.debug("Orders expired");
+	}
+
+	/**
+	 * Fires the event
+	 * 
+	 * @param order
+	 *            - The order processed
+	 */
+	private void sendEvent(final Order order) {
+		if (orderEvent != null) {
+			orderEvent.fire(order);
+		}
+
+		if (jmsContext != null) {
+			jmsContext.createProducer().send(ordersQueue, order);
+		}
+	}
 }
