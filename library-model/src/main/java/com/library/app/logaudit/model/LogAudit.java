@@ -64,7 +64,7 @@ public class LogAudit implements Serializable {
 	 * @param element
 	 */
 	public LogAudit(final User user, final Action action, final String element) {
-		super();
+		this();
 		this.user = user;
 		this.action = action;
 		this.element = element;

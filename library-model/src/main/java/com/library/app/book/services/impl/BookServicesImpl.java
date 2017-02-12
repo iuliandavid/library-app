@@ -9,6 +9,7 @@ import java.util.List;
 import javax.ejb.Stateful;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
+import javax.interceptor.Interceptors;
 import javax.validation.Validator;
 
 import com.library.app.author.exception.AuthorNotFoundException;
@@ -26,6 +27,9 @@ import com.library.app.common.exception.FieldNotValidException;
 import com.library.app.common.model.PaginatedData;
 import com.library.app.common.model.filter.FilterValidationException;
 import com.library.app.common.utils.ValidationUtils;
+import com.library.app.logaudit.interceptor.Auditable;
+import com.library.app.logaudit.interceptor.LogAuditInterceptor;
+import com.library.app.logaudit.model.LogAudit.Action;
 
 /**
  * Since there is a pool of {@link Stateless} ejbs is more useful and scalable to use the {@link Stateless} instead of
@@ -35,6 +39,7 @@ import com.library.app.common.utils.ValidationUtils;
  *
  */
 @Stateless
+@Interceptors(LogAuditInterceptor.class)
 public class BookServicesImpl implements BookServices {
 
 	/** Will be used by container's own Validator implementation **/
@@ -56,6 +61,7 @@ public class BookServicesImpl implements BookServices {
 	 * @see com.library.app.book.services.BookServices#add(com.library.app.book.model.Book)
 	 */
 	@Override
+	@Auditable(action = Action.ADD)
 	public Book add(final Book book) {
 		ValidationUtils.validateEntityFields(validator, book);
 
@@ -71,6 +77,7 @@ public class BookServicesImpl implements BookServices {
 	 * @see com.library.app.book.services.BookServices#update(com.library.app.book.model.Book)
 	 */
 	@Override
+	@Auditable(action = Action.UPDATE)
 	public void update(final Book book)
 			throws FieldNotValidException, CategoryNotFoundException, AuthorNotFoundException, BookNotFoundException {
 

@@ -4,6 +4,7 @@
 package com.library.app.author.resource;
 
 import static com.library.app.commontests.author.AuthorForTestsRepository.*;
+import static com.library.app.commontests.logaudit.LogAuditTestUtils.*;
 import static com.library.app.commontests.user.UserForTestsRepository.*;
 import static com.library.app.commontests.utils.FileTestNameUtils.*;
 import static com.library.app.commontests.utils.JsonTestUtils.*;
@@ -11,6 +12,7 @@ import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 
 import java.net.URL;
+import java.util.Arrays;
 
 import javax.ws.rs.core.Response;
 
@@ -34,6 +36,8 @@ import com.library.app.commontests.utils.ArquillianTestUtils;
 import com.library.app.commontests.utils.IntegrationTestUtils;
 import com.library.app.commontests.utils.ResourceClient;
 import com.library.app.commontests.utils.ResourceDefinitions;
+import com.library.app.logaudit.model.LogAudit;
+import com.library.app.logaudit.model.LogAudit.Action;
 
 /**
  * Integration Tests made with Arquillian
@@ -72,6 +76,8 @@ public class AuthorResourceIntTest {
 
 	private static final String PATH_RESOURCE = ResourceDefinitions.AUTHOR.getResourceName();
 
+	private static final String ELEMENT_NAME = Author.class.getSimpleName();
+
 	@Deployment
 	public static WebArchive createDeployment() {
 		return ArquillianTestUtils.createDeploymentArchive();
@@ -92,6 +98,8 @@ public class AuthorResourceIntTest {
 	public void addValidAuthorAndFindIt() {
 		final Long authorId = addAuthorAndGetId("robertMartin.json");
 		findAuthorAndAssertResponseWithAuthor(authorId, robertMartin());
+
+		assertAuditLogs(resourceClient, 1, new LogAudit(admin(), Action.ADD, ELEMENT_NAME));
 	}
 
 	@Test
@@ -102,6 +110,7 @@ public class AuthorResourceIntTest {
 
 		assertThat(response.getStatus(), is(equalTo(HttpCode.VALIDATION_ERROR.getCode())));
 		assertJsonResponseWithFile(response, "authorErrorNullName.json");
+		assertAuditLogs(resourceClient, 0);
 	}
 
 	@Test
@@ -117,6 +126,8 @@ public class AuthorResourceIntTest {
 		final Author uncleBob = new Author("Uncle Bob");
 		uncleBob.setId(id);
 		findAuthorAndAssertResponseWithAuthor(id, uncleBob);
+		assertAuditLogs(resourceClient, 2, new LogAudit(admin(), Action.UPDATE, ELEMENT_NAME),
+				new LogAudit(admin(), Action.ADD, ELEMENT_NAME));
 	}
 
 	@Test
@@ -125,6 +136,7 @@ public class AuthorResourceIntTest {
 		final Response response = resourceClient.resourcePath(PATH_RESOURCE + "/999").putWithFile(
 				getPathFileRequest(PATH_RESOURCE, "robertMartin.json"));
 		assertThat(response.getStatus(), is(equalTo(HttpCode.NOT_FOUND.getCode())));
+		assertAuditLogs(resourceClient, 0);
 	}
 
 	@Test
@@ -132,6 +144,7 @@ public class AuthorResourceIntTest {
 	public void findAuthorNotFound() {
 		final Response response = resourceClient.resourcePath(PATH_RESOURCE + "/999").get();
 		assertThat(response.getStatus(), is(equalTo(HttpCode.NOT_FOUND.getCode())));
+		assertAuditLogs(resourceClient, 0);
 	}
 
 	@Test
@@ -152,6 +165,10 @@ public class AuthorResourceIntTest {
 				.resourcePath(PATH_RESOURCE + "?page=1&per_page=" + expectedRows + "&sort=-name").get();
 		assertThat(response.getStatus(), is(equalTo(HttpCode.OK.getCode())));
 		assertResponseContainsTheAuthors(response, 12, erichGamma(), donRoberts());
+
+		final LogAudit[] logs = new LogAudit[10];
+		Arrays.fill(logs, new LogAudit(admin(), Action.ADD, ELEMENT_NAME));
+		assertAuditLogs(resourceClient, 12, logs);
 	}
 
 	@Test
@@ -159,6 +176,7 @@ public class AuthorResourceIntTest {
 	public void findByFilterWithNoUser() {
 		final Response response = resourceClient.user(null).resourcePath(PATH_RESOURCE).get();
 		assertThat(response.getStatus(), is(equalTo(HttpCode.UNAUTHORIZED.getCode())));
+		assertAuditLogs(resourceClient, 0);
 	}
 
 	@Test
@@ -166,6 +184,8 @@ public class AuthorResourceIntTest {
 	public void findByFilterWithUserCustomer() {
 		final Response response = resourceClient.user(johnDoe()).resourcePath(PATH_RESOURCE).get();
 		assertThat(response.getStatus(), is(equalTo(HttpCode.OK.getCode())));
+
+		assertAuditLogs(resourceClient, 0);
 	}
 
 	@Test

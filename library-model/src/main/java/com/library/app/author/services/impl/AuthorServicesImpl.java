@@ -10,6 +10,7 @@ import java.util.List;
 import javax.ejb.Stateful;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
+import javax.interceptor.Interceptors;
 import javax.validation.Validator;
 
 import com.library.app.author.exception.AuthorNotFoundException;
@@ -19,6 +20,9 @@ import com.library.app.author.repository.AuthorRepository;
 import com.library.app.author.services.AuthorServices;
 import com.library.app.common.model.PaginatedData;
 import com.library.app.common.model.filter.FilterValidationException;
+import com.library.app.logaudit.interceptor.Auditable;
+import com.library.app.logaudit.interceptor.LogAuditInterceptor;
+import com.library.app.logaudit.model.LogAudit.Action;
 
 /**
  * Since there is a pool of {@link Stateless} ejbs is more useful and scalable to use the {@link Stateless} instead of
@@ -28,6 +32,7 @@ import com.library.app.common.model.filter.FilterValidationException;
  *
  */
 @Stateless
+@Interceptors(LogAuditInterceptor.class)
 public class AuthorServicesImpl implements AuthorServices {
 
 	/** Will be used by container's own Validator implementation **/
@@ -43,6 +48,7 @@ public class AuthorServicesImpl implements AuthorServices {
 	 * @see com.library.app.author.services.AuthorServices#add(com.library.app.author.model.Author)
 	 */
 	@Override
+	@Auditable(action = Action.ADD)
 	public Author add(final Author author) {
 		validateEntityFields(validator, author);
 		return authorRepository.add(author);
@@ -54,6 +60,7 @@ public class AuthorServicesImpl implements AuthorServices {
 	 * @see com.library.app.author.services.AuthorServices#update(com.library.app.author.model.Author)
 	 */
 	@Override
+	@Auditable(action = Action.UPDATE)
 	public void update(final Author author) {
 		validateEntityFields(validator, author);
 

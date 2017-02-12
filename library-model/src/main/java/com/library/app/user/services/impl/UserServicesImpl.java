@@ -6,12 +6,16 @@ package com.library.app.user.services.impl;
 import javax.ejb.Stateful;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
+import javax.interceptor.Interceptors;
 import javax.validation.Validator;
 
 import com.library.app.common.exception.FieldNotValidException;
 import com.library.app.common.model.PaginatedData;
 import com.library.app.common.utils.PasswordUtils;
 import com.library.app.common.utils.ValidationUtils;
+import com.library.app.logaudit.interceptor.Auditable;
+import com.library.app.logaudit.interceptor.LogAuditInterceptor;
+import com.library.app.logaudit.model.LogAudit.Action;
 import com.library.app.user.exception.UserExistentException;
 import com.library.app.user.exception.UserNotFoundException;
 import com.library.app.user.model.User;
@@ -27,6 +31,7 @@ import com.library.app.user.services.UserServices;
  *
  */
 @Stateless
+@Interceptors(LogAuditInterceptor.class)
 public class UserServicesImpl implements UserServices {
 
 	/** Will be used by container's own Validator implementation **/
@@ -42,6 +47,7 @@ public class UserServicesImpl implements UserServices {
 	 * @see com.library.app.user.services.UserServices#add(com.library.app.user.model.User)
 	 */
 	@Override
+	@Auditable(action = Action.ADD)
 	public User add(final User user) throws FieldNotValidException, UserNotFoundException {
 		validateUser(user);
 		user.setPassword(PasswordUtils.encryptPassword(user.getPassword()));
@@ -54,6 +60,7 @@ public class UserServicesImpl implements UserServices {
 	 * @see com.library.app.user.services.UserServices#update(com.library.app.user.model.User)
 	 */
 	@Override
+	@Auditable(action = Action.UPDATE)
 	public void update(final User user) throws FieldNotValidException, UserNotFoundException {
 
 		final User existentUser = findById(user.getId());
@@ -96,6 +103,7 @@ public class UserServicesImpl implements UserServices {
 	}
 
 	@Override
+	@Auditable(action = Action.UPDATE)
 	public void updatePassword(final long id, final String password) {
 		final User user = findById(id);
 		user.setPassword(PasswordUtils.encryptPassword(password));
