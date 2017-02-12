@@ -11,6 +11,9 @@ import javax.ejb.Stateless;
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
 import javax.interceptor.Interceptors;
+import javax.jms.JMSConnectionFactory;
+import javax.jms.JMSContext;
+import javax.jms.Queue;
 import javax.validation.Validator;
 import javax.ws.rs.core.SecurityContext;
 
@@ -66,6 +69,13 @@ public class OrderServicesImpl implements OrderServices {
 	/** The {@link Event} variable **/
 	@Inject
 	private Event<Order> orderEvent;
+
+	@Resource(mappedName = "java:/jms/queue/Orders")
+	private Queue ordersQueue;
+
+	@Inject
+	@JMSConnectionFactory("java:jboss/DefaultJMSConnectionFactory")
+	private JMSContext jmsContext;
 
 	private Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -196,5 +206,7 @@ public class OrderServicesImpl implements OrderServices {
 	 */
 	private void sendEvent(final Order order) {
 		orderEvent.fire(order);
+
+		jmsContext.createProducer().send(ordersQueue, order);
 	}
 }

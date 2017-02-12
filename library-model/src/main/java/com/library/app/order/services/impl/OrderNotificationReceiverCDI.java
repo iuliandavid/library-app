@@ -26,6 +26,6 @@ public class OrderNotificationReceiverCDI {
 	 * @param order
 	 */
 	public void receiveEvent(@Observes final Order order) {
-		logger.debug("Order notification received for order: {}", order);
+		logger.debug("Order event notification received for order: {}", order);
 	}
 }
