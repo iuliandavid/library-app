@@ -205,8 +205,12 @@ public class OrderServicesImpl implements OrderServices {
 	 *            - The order processed
 	 */
 	private void sendEvent(final Order order) {
-		orderEvent.fire(order);
+		if (orderEvent != null) {
+			orderEvent.fire(order);
+		}
 
-		jmsContext.createProducer().send(ordersQueue, order);
+		if (jmsContext != null) {
+			jmsContext.createProducer().send(ordersQueue, order);
+		}
 	}
 }
