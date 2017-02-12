@@ -35,7 +35,8 @@ public class OrderExpiratorJob {
 	@PropertyValue(name = "days-before-order-expiration")
 	private Integer daysBeforeOrderExpiration;
 
-	@Schedule(hour = "*/1", minute = "0", second = "0", persistent = false)
+	// @Schedule(hour = "*/1", minute = "0", second = "0", persistent = false)
+	@Schedule(hour = "*", minute = "*", persistent = false)
 	public void run() {
 		logger.debug("Executing order expirator job");
 

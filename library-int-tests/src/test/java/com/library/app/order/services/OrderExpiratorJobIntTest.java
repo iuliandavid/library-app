@@ -98,4 +98,5 @@ public class OrderExpiratorJobIntTest {
 
 		assertThat(orders.getNumberOfRows(), is(equalTo(expectedTotalRecords)));
 	}
+
 }

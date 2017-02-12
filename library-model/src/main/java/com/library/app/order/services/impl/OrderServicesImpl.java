@@ -8,6 +8,7 @@ import java.security.Principal;
 import javax.annotation.Resource;
 import javax.ejb.SessionContext;
 import javax.ejb.Stateless;
+import javax.enterprise.event.Event;
 import javax.inject.Inject;
 import javax.interceptor.Interceptors;
 import javax.validation.Validator;
@@ -62,6 +63,9 @@ public class OrderServicesImpl implements OrderServices {
 	@Resource
 	SessionContext sessionContext;
 
+	@Inject
+	private Event<Order> orderEvent;
+
 	private Logger logger = LoggerFactory.getLogger(getClass());
 
 	/*
@@ -79,6 +83,9 @@ public class OrderServicesImpl implements OrderServices {
 		order.calculateTotal();
 
 		ValidationUtils.validateEntityFields(validator, order);
+
+		sendEvent(order);
+
 		return orderRepository.add(order);
 	}
 
@@ -125,6 +132,8 @@ public class OrderServicesImpl implements OrderServices {
 		}
 
 		order.setCurrentStatus(newStatus);
+
+		sendEvent(order);
 
 		orderRepository.update(order);
 	}
@@ -178,4 +187,7 @@ public class OrderServicesImpl implements OrderServices {
 		logger.debug("Orders expired");
 	}
 
+	private void sendEvent(final Order order) {
+		orderEvent.fire(order);
+	}
 }
