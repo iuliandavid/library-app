@@ -10,7 +10,7 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.library.app.common.appproperties.ApplicationProperties;
+import com.library.app.common.appproperties.PropertyValue;
 import com.library.app.order.services.OrderServices;
 
 /**
@@ -29,13 +29,16 @@ public class OrderExpiratorJob {
 	@Inject
 	private OrderServices orderServices;
 
-	@Inject
-	private ApplicationProperties applicationProperties;
+	// @Inject
+	// private ApplicationProperties applicationProperties;
+
+	@PropertyValue(name = "days-before-order-expiration")
+	private Integer daysBeforeOrderExpiration;
 
 	@Schedule(hour = "*/1", minute = "0", second = "0", persistent = false)
 	public void run() {
 		logger.debug("Executing order expirator job");
 
-		orderServices.changeStatusOfExpiredOrders(applicationProperties.getDaysBeforeOrderExpiration());
+		orderServices.changeStatusOfExpiredOrders(daysBeforeOrderExpiration);
 	}
 }
